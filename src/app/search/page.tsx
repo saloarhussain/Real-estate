@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Grid, ArrowUpRight, Search as SearchIcon, X, Heart } from "lucide-react";
 import Map from "@/components/Map";
+import Header from "@/components/Header";
 import listingsData from "@/data/listings.json";
 
 interface Property {
@@ -101,6 +102,8 @@ function SearchContent() {
 
   return (
     <div className="flex flex-col flex-1 h-screen overflow-hidden pt-16 bg-white dark:bg-[#090d16]">
+      <Header />
+      
       {/* Search Header Panel */}
       <section className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200/50 dark:border-slate-800/50 py-4 px-6 z-20 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
         <div className="flex flex-wrap gap-3 items-center w-full md:w-auto">
