@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Map, Marker, Overlay } from "pigeon-maps";
+import { Map, Overlay } from "pigeon-maps";
 
 interface Property {
   id: string;
@@ -36,6 +36,76 @@ const cityCenters: { [key: string]: [number, number] } = {
   Goa: [15.59, 73.74],
   all: [20.5937, 78.9629], // Central India
 };
+
+// Coordinate boundaries to simulate the City Boundary Highlight exactly like Zillow State Outline
+const cityBoundaries: { [key: string]: [number, number][] } = {
+  Mumbai: [
+    [19.26, 72.82],
+    [19.24, 72.90],
+    [19.16, 72.98],
+    [18.98, 72.96],
+    [18.90, 72.88],
+    [18.88, 72.81],
+    [18.94, 72.70],
+    [19.06, 72.74],
+    [19.20, 72.76],
+  ],
+  Bangalore: [
+    [13.12, 77.50],
+    [13.14, 77.64],
+    [13.06, 77.76],
+    [12.90, 77.78],
+    [12.80, 77.66],
+    [12.82, 77.44],
+    [12.98, 77.42],
+  ],
+  Delhi: [
+    [28.84, 77.06],
+    [28.82, 77.28],
+    [28.68, 77.38],
+    [28.48, 77.34],
+    [28.42, 77.10],
+    [28.50, 76.92],
+    [28.74, 76.96],
+  ],
+  Goa: [
+    [15.86, 73.66],
+    [15.80, 73.92],
+    [15.52, 74.06],
+    [15.18, 73.98],
+    [15.24, 73.70],
+    [15.66, 73.60],
+  ],
+};
+
+interface BoundaryProps {
+  coordinates: [number, number][];
+  latLngToPixel?: (latLng: [number, number]) => [number, number];
+}
+
+// Custom City Outline Overlay Component
+function CityBoundary({ coordinates, latLngToPixel }: BoundaryProps) {
+  if (!latLngToPixel || !coordinates || coordinates.length === 0) return null;
+
+  const points = coordinates
+    .map((coord) => latLngToPixel(coord))
+    .map((pixel) => pixel.join(","))
+    .join(" ");
+
+  return (
+    <div className="absolute inset-0 pointer-events-none w-full h-full z-0">
+      <svg className="w-full h-full absolute inset-0">
+        <polygon
+          points={points}
+          fill="rgba(59, 130, 246, 0.08)"
+          stroke="#3b82f6"
+          strokeWidth="3"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </div>
+  );
+}
 
 export default function CustomMap({ properties, selectedProperty, onSelectProperty, centerCity }: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
@@ -77,6 +147,16 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
     }).format(val);
   };
 
+  // Format short price tag (e.g. ₹6.50 Cr, ₹4.20 Cr) exactly like Zillow's K/M price tags
+  const formatShortPrice = (val: number) => {
+    if (val >= 10000000) {
+      return `₹${(val / 10000000).toFixed(2)} Cr`;
+    } else if (val >= 100000) {
+      return `₹${(val / 100000).toFixed(0)} L`;
+    }
+    return `₹${val.toLocaleString("en-IN")}`;
+  };
+
   // Determine initial center and zoom based only on the selected city (remains still on hover)
   const defaultCenter = cityCenters[centerCity] || cityCenters.all;
   const defaultZoom = centerCity === "all" ? 5 : 12;
@@ -93,18 +173,37 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
           defaultCenter={defaultCenter}
           defaultZoom={defaultZoom}
         >
-          {properties.map((prop) => (
-            <Marker
-              key={prop.id}
-              anchor={[prop.lat, prop.lng]}
-              color={selectedProperty?.id === prop.id ? "#3b82f6" : "#ef4444"}
-              onClick={() => onSelectProperty(prop)}
-            />
-          ))}
+          {/* City Boundary Polygon Outline */}
+          {centerCity !== "all" && cityBoundaries[centerCity] && (
+            <CityBoundary coordinates={cityBoundaries[centerCity]} />
+          )}
+
+          {/* Zillow-style Price Tag Markers */}
+          {properties.map((prop) => {
+            const isSelected = selectedProperty?.id === prop.id;
+            return (
+              <Overlay
+                key={prop.id}
+                anchor={[prop.lat, prop.lng]}
+                offset={[0, 0]}
+              >
+                <button
+                  onClick={() => onSelectProperty(prop)}
+                  className={`px-2 py-1 rounded-md text-[9px] font-extrabold shadow-md border transition-all pointer-events-auto ${
+                    isSelected
+                      ? "bg-blue-600 border-blue-700 text-white scale-110 z-30"
+                      : "bg-white border-slate-200 text-slate-800 hover:bg-slate-50 dark:bg-slate-950 dark:border-slate-800 dark:text-white dark:hover:bg-slate-900"
+                  }`}
+                >
+                  {formatShortPrice(prop.price)}
+                </button>
+              </Overlay>
+            );
+          })}
 
           {selectedProperty && (
             <Overlay anchor={[selectedProperty.lat, selectedProperty.lng]} offset={[0, -20]}>
-              <div className="p-3 bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-[190px] text-left space-y-2 pointer-events-auto relative">
+              <div className="p-3 bg-white dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl w-[190px] text-left space-y-2 pointer-events-auto relative z-40">
                 <button 
                   onClick={(e) => {
                     e.stopPropagation();
