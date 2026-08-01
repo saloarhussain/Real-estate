@@ -47,20 +47,20 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
   const [mapHeight, setMapHeight] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Measure actual height of the container DOM element after mount/resize
+  // Measure actual height of the container DOM element dynamically using ResizeObserver
   useEffect(() => {
-    if (containerRef.current) {
-      setMapHeight(containerRef.current.clientHeight || 500);
+    if (!containerRef.current) return;
 
-      const handleResize = () => {
-        if (containerRef.current) {
-          setMapHeight(containerRef.current.clientHeight || 500);
-        }
-      };
+    const observer = new ResizeObserver(() => {
+      if (containerRef.current) {
+        setMapHeight(containerRef.current.clientHeight || 500);
+      }
+    });
 
-      window.addEventListener("resize", handleResize);
-      return () => window.removeEventListener("resize", handleResize);
-    }
+    observer.observe(containerRef.current);
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   // Sync centerCity prop change during render
