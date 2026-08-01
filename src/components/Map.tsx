@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Map, Marker, Overlay } from "pigeon-maps";
 
 interface Property {
@@ -39,8 +39,6 @@ const cityCenters: { [key: string]: [number, number] } = {
 
 export default function CustomMap({ properties, selectedProperty, onSelectProperty, centerCity }: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const [mapHeight, setMapHeight] = useState<number>(500); // Safe fallback default height
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Set isMounted to true on client mount to prevent SSR hydration mismatches
   useEffect(() => {
@@ -49,22 +47,6 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
     }, 0);
     return () => clearTimeout(timer);
   }, []);
-
-  // Measure actual height of the container DOM element dynamically using ResizeObserver
-  useEffect(() => {
-    if (!isMounted || !containerRef.current) return;
-
-    const observer = new ResizeObserver(() => {
-      if (containerRef.current) {
-        setMapHeight(containerRef.current.clientHeight || 500);
-      }
-    });
-
-    observer.observe(containerRef.current);
-    return () => {
-      observer.disconnect();
-    };
-  }, [isMounted]);
 
   // Format currency helper
   const formatCurrency = (val: number) => {
@@ -83,11 +65,11 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
   const mapKey = centerCity;
 
   return (
-    <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-slate-900">
+    <div className="w-full h-full relative overflow-hidden bg-slate-900">
       {isMounted && (
         <Map
           key={mapKey}
-          height={mapHeight}
+          height={"100%" as unknown as number}
           defaultCenter={defaultCenter}
           defaultZoom={defaultZoom}
         >
