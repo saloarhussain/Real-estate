@@ -194,7 +194,10 @@ function SearchContent() {
       </section>
 
       {/* Main Split Pane Layout - viewport height locked on desktop */}
-      <div className="flex flex-col md:flex-row flex-1 h-[calc(100vh-144px)] overflow-hidden relative">
+      <div 
+        className="flex flex-col md:flex-row flex-1 overflow-hidden relative"
+        style={{ height: "calc(100vh - 144px)" }}
+      >
         
         {/* Left Side: Interactive Map */}
         <div
