@@ -39,6 +39,7 @@ const cityCenters: { [key: string]: [number, number] } = {
 
 export default function CustomMap({ properties, selectedProperty, onSelectProperty, centerCity }: MapProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const [mapHeight, setMapHeight] = useState<number>(600);
 
   // Set isMounted to true on client mount to prevent SSR hydration mismatches
   useEffect(() => {
@@ -47,6 +48,25 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
     }, 0);
     return () => clearTimeout(timer);
   }, []);
+
+  // Calculate actual height of the map based on viewport size, preventing layout feedback loops
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const handleResize = () => {
+      // Viewport height minus the navigation and filters header heights (approx 140px)
+      const computedHeight = window.innerHeight - 140;
+      setMapHeight(Math.max(400, computedHeight));
+    };
+
+    // Initial measurement
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isMounted]);
 
   // Format currency helper
   const formatCurrency = (val: number) => {
@@ -69,7 +89,7 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
       {isMounted && (
         <Map
           key={mapKey}
-          height={"100%" as unknown as number}
+          height={mapHeight}
           defaultCenter={defaultCenter}
           defaultZoom={defaultZoom}
         >
