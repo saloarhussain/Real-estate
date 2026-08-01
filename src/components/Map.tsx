@@ -38,12 +38,21 @@ const cityCenters: { [key: string]: [number, number] } = {
 };
 
 export default function CustomMap({ properties, selectedProperty, onSelectProperty, centerCity }: MapProps) {
-  const [mapHeight, setMapHeight] = useState<number>(0);
+  const [isMounted, setIsMounted] = useState(false);
+  const [mapHeight, setMapHeight] = useState<number>(500); // Safe fallback default height
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Set isMounted to true on client mount to prevent SSR hydration mismatches
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Measure actual height of the container DOM element dynamically using ResizeObserver
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!isMounted || !containerRef.current) return;
 
     const observer = new ResizeObserver(() => {
       if (containerRef.current) {
@@ -55,7 +64,7 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
     return () => {
       observer.disconnect();
     };
-  }, []);
+  }, [isMounted]);
 
   // Format currency helper
   const formatCurrency = (val: number) => {
@@ -75,9 +84,10 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
 
   return (
     <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-slate-900">
-      {mapHeight > 0 && (
+      {isMounted && (
         <Map
           key={mapKey}
+          height={mapHeight}
           defaultCenter={defaultCenter}
           defaultZoom={defaultZoom}
         >
