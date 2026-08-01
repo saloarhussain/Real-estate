@@ -190,7 +190,7 @@ function SearchContent() {
         
         {/* Left Side: Interactive Map */}
         <div
-          className={`absolute md:relative inset-0 md:w-1/2 lg:w-3/5 h-full transition-all duration-300 z-10 ${
+          className={`absolute md:relative inset-0 md:w-1/2 lg:w-1/2 h-full transition-all duration-300 z-10 ${
             showMobileMap ? "translate-x-0" : "translate-x-full md:translate-x-0"
           }`}
         >
@@ -203,7 +203,7 @@ function SearchContent() {
         </div>
 
         {/* Right Side: Properties List Grid */}
-        <div className="w-full md:w-1/2 lg:w-2/5 h-full overflow-y-auto bg-white dark:bg-[#090d16] p-6 space-y-6">
+        <div className="w-full md:w-1/2 lg:w-1/2 h-full overflow-y-auto bg-white dark:bg-[#090d16] p-6 space-y-6">
           <div className="flex justify-between items-center">
             <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
               Found <span className="text-blue-600 font-extrabold">{filteredProperties.length}</span> matching properties
