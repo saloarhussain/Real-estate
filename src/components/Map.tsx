@@ -96,9 +96,14 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
           height={mapHeight}
           center={center}
           zoom={zoom}
-          onBoundsChanged={({ center, zoom }) => {
-            setCenter(center);
-            setZoom(zoom);
+          onBoundsChanged={({ center: newCenter, zoom: newZoom }) => {
+            const isCenterDifferent = Math.abs(newCenter[0] - center[0]) > 0.0001 || 
+                                      Math.abs(newCenter[1] - center[1]) > 0.0001;
+            const isZoomDifferent = newZoom !== zoom;
+            if (isCenterDifferent || isZoomDifferent) {
+              setCenter(newCenter);
+              setZoom(newZoom);
+            }
           }}
         >
           {properties.map((prop) => (
