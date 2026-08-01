@@ -83,7 +83,7 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
   const mapKey = centerCity;
 
   return (
-    <div ref={containerRef} className="w-full h-full absolute inset-0 overflow-hidden bg-slate-900">
+    <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-slate-900">
       {isMounted && (
         <Map
           key={mapKey}

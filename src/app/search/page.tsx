@@ -190,7 +190,7 @@ function SearchContent() {
         
         {/* Left Side: Interactive Map */}
         <div
-          className={`absolute md:relative inset-0 md:w-1/2 lg:w-1/2 h-full transition-all duration-300 z-10 ${
+          className={`absolute md:relative inset-0 md:w-1/2 lg:w-1/2 h-full overflow-hidden transition-all duration-300 z-10 ${
             showMobileMap ? "translate-x-0" : "translate-x-full md:translate-x-0"
           }`}
         >
