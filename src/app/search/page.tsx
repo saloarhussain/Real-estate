@@ -194,7 +194,7 @@ function SearchContent() {
       </section>
 
       {/* Main Split Pane Layout */}
-      <div className="flex flex-1 relative overflow-hidden">
+      <div className="flex flex-1 h-0 min-h-0 relative overflow-hidden">
         
         {/* Left Side: Interactive Map */}
         <div
