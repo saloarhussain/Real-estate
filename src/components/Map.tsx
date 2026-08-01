@@ -38,12 +38,6 @@ const cityCenters: { [key: string]: [number, number] } = {
 };
 
 export default function CustomMap({ properties, selectedProperty, onSelectProperty, centerCity }: MapProps) {
-  const [prevCenterCity, setPrevCenterCity] = useState(centerCity);
-  const [prevSelectedProperty, setPrevSelectedProperty] = useState(selectedProperty);
-
-  const [center, setCenter] = useState<[number, number]>(cityCenters.all);
-  const [zoom, setZoom] = useState(5);
-
   const [mapHeight, setMapHeight] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -63,23 +57,6 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
     };
   }, []);
 
-  // Sync centerCity prop change during render
-  if (centerCity !== prevCenterCity) {
-    setPrevCenterCity(centerCity);
-    const cityCenter = cityCenters[centerCity] || cityCenters.all;
-    setCenter(cityCenter);
-    setZoom(centerCity === "all" ? 5 : 12);
-  }
-
-  // Sync selectedProperty prop change during render
-  if (selectedProperty !== prevSelectedProperty) {
-    setPrevSelectedProperty(selectedProperty);
-    if (selectedProperty) {
-      setCenter([selectedProperty.lat, selectedProperty.lng]);
-      setZoom(14);
-    }
-  }
-
   // Format currency helper
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -89,22 +66,23 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
     }).format(val);
   };
 
+  // Determine initial center and zoom based on props
+  const defaultCenter = selectedProperty 
+    ? ([selectedProperty.lat, selectedProperty.lng] as [number, number]) 
+    : (cityCenters[centerCity] || cityCenters.all);
+    
+  const defaultZoom = selectedProperty ? 14 : (centerCity === "all" ? 5 : 12);
+
+  // Change key to force a clean remount when programmatically centering the map
+  const mapKey = `${centerCity}-${selectedProperty?.id || "none"}`;
+
   return (
     <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-slate-900">
       {mapHeight > 0 && (
         <Map
-          height={mapHeight}
-          center={center}
-          zoom={zoom}
-          onBoundsChanged={({ center: newCenter, zoom: newZoom }) => {
-            const isCenterDifferent = Math.abs(newCenter[0] - center[0]) > 0.0001 || 
-                                      Math.abs(newCenter[1] - center[1]) > 0.0001;
-            const isZoomDifferent = newZoom !== zoom;
-            if (isCenterDifferent || isZoomDifferent) {
-              setCenter(newCenter);
-              setZoom(newZoom);
-            }
-          }}
+          key={mapKey}
+          defaultCenter={defaultCenter}
+          defaultZoom={defaultZoom}
         >
           {properties.map((prop) => (
             <Marker
