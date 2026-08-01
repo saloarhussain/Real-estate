@@ -4,7 +4,7 @@ import React, { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, Grid, Bed, Bath, ArrowUpRight, Search as SearchIcon, X } from "lucide-react";
+import { MapPin, Grid, ArrowUpRight, Search as SearchIcon, X, Heart } from "lucide-react";
 import Map from "@/components/Map";
 import listingsData from "@/data/listings.json";
 
@@ -241,7 +241,7 @@ function SearchContent() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-6 pb-24">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-24">
             <AnimatePresence mode="popLayout">
               {filteredProperties.map((prop) => (
                 <motion.div
@@ -251,15 +251,15 @@ function SearchContent() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.98 }}
                   onMouseEnter={() => setSelectedProperty(prop)}
-                  className={`bg-white dark:bg-slate-900 rounded-2xl border overflow-hidden transition-all shadow-md group hover:shadow-xl cursor-pointer ${
+                  className={`bg-white dark:bg-slate-900 rounded-xl border overflow-hidden transition-all shadow-md group hover:shadow-xl cursor-pointer ${
                     selectedProperty?.id === prop.id
                       ? "border-blue-500 ring-2 ring-blue-500/10"
                       : "border-slate-200/50 dark:border-slate-800/50"
                   }`}
                 >
-                  <Link href={`/properties/${prop.id}`} className="flex flex-col sm:flex-row h-full">
+                  <Link href={`/properties/${prop.id}`} className="flex flex-col h-full">
                     {/* Thumbnail Image */}
-                    <div className="w-full sm:w-44 h-48 sm:h-auto overflow-hidden relative bg-slate-100 flex-shrink-0">
+                    <div className="w-full h-44 overflow-hidden relative bg-slate-100 flex-shrink-0">
                       <img
                         src={prop.images[0]}
                         alt={prop.title}
@@ -268,43 +268,41 @@ function SearchContent() {
                       <div className="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-slate-950/60 backdrop-blur-sm text-[8px] font-black text-white uppercase tracking-widest">
                         {prop.type}
                       </div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        className="absolute top-3 right-3 p-1.5 rounded-full bg-slate-950/40 text-white backdrop-blur-sm hover:text-red-500 hover:scale-110 transition-all"
+                      >
+                        <Heart className="h-3.5 w-3.5" />
+                      </button>
                     </div>
 
                     {/* Details Info */}
-                    <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                    <div className="p-4 flex-1 flex flex-col justify-between space-y-2">
                       <div className="space-y-1">
-                        <div className="flex justify-between items-start gap-2">
-                          <h4 className="font-extrabold text-sm text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors leading-snug">
-                            {prop.title}
-                          </h4>
+                        <div className="flex justify-between items-center">
+                          <h3 className="text-base font-extrabold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors leading-tight">
+                            {formatCurrency(prop.price)}
+                          </h3>
                           <ArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all flex-shrink-0" />
                         </div>
-                        <p className="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                          <MapPin className="h-3 w-3 text-blue-500" /> {prop.address}, {prop.city}
+                        <p className="text-[11px] text-slate-700 dark:text-slate-200 font-semibold tracking-wide">
+                          {prop.beds} bds | {prop.baths} ba | {prop.sqft.toLocaleString("en-IN")} sqft | {prop.type}
+                        </p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate flex items-center gap-1 font-medium">
+                          <MapPin className="h-3 w-3 text-blue-500 flex-shrink-0" /> {prop.address}, {prop.city}
                         </p>
                       </div>
 
-                      {/* Info Row */}
-                      <div className="flex gap-4 items-center text-[11px] font-medium text-slate-600 dark:text-slate-300">
-                        <span className="flex items-center gap-1"><Bed className="h-3.5 w-3.5 text-slate-400" /> {prop.beds} Beds</span>
-                        <span className="flex items-center gap-1"><Bath className="h-3.5 w-3.5 text-slate-400" /> {prop.baths} Baths</span>
-                        <span className="font-mono">{prop.sqft} sqft</span>
-                      </div>
-
-                      {/* Bottom row: Zestimate and Price */}
-                      <div className="flex justify-between items-end pt-3 border-t border-slate-100 dark:border-slate-800">
-                        <div>
-                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Spire Estimate</p>
-                          <p className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                            {formatCurrency(prop.zestimate)}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Price</p>
-                          <p className="text-sm font-black text-blue-600 dark:text-blue-400">
-                            {formatCurrency(prop.price)}
-                          </p>
-                        </div>
+                      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-[9px] font-semibold uppercase tracking-wider">
+                        <span className="text-slate-400 dark:text-slate-500">Spire Real Estate Group</span>
+                        {prop.zestimate && (
+                          <span className="text-slate-400 dark:text-slate-500 normal-case font-medium">
+                            Est: {formatCurrency(prop.zestimate)}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </Link>
