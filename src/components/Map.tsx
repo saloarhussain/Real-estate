@@ -78,15 +78,22 @@ const cityBoundaries: { [key: string]: [number, number][] } = {
     [15.66, 73.60],
   ],
   Worli: [
-    [19.022, 72.812], // North coast (Sea link entry)
-    [19.022, 72.816], // Koliwada point
-    [19.014, 72.824], // Boundary near Dadar
-    [19.002, 72.828], // East boundary near Senapati Bapat Marg
-    [18.988, 72.824], // South-east near Racecourse
-    [18.980, 72.820], // South-east corner near Racecourse entrance
-    [18.976, 72.808], // South-west corner near Haji Ali Dargah
-    [18.992, 72.796], // West coast Worli Sea Face
-    [19.010, 72.800], // West coast Sea Link
+    [19.026, 72.816], // Koliwada tip (North-most)
+    [19.022, 72.819], // Dadar edge north
+    [19.015, 72.822], // Dadar edge mid
+    [19.008, 72.823], // Dadar edge south
+    [18.999, 72.825], // Senapati Bapat Marg entry
+    [18.994, 72.829], // East boundary near planetarium
+    [18.986, 72.831], // Near Byculla border
+    [18.978, 72.824], // Just above racecourse (south-east corner)
+    [18.976, 72.810], // Near Haji Ali Dargah (south-west corner)
+    [18.982, 72.806], // Sea Face start
+    [18.990, 72.798], // Worli Sea Face south
+    [18.998, 72.796], // Worli Sea Face mid
+    [19.006, 72.799], // Worli Sea Face north
+    [19.014, 72.802], // Bandra-Worli Sea Link toll plaza
+    [19.020, 72.806], // Sea Link road going north
+    [19.025, 72.811], // Sea Link curve
   ],
 };
 
