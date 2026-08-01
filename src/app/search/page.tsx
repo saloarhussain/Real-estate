@@ -201,9 +201,10 @@ function SearchContent() {
         
         {/* Left Side: Interactive Map */}
         <div
-          className={`w-full md:w-1/2 h-full overflow-hidden relative bg-slate-900 ${
+          className={`w-full md:w-1/2 overflow-hidden relative bg-slate-900 ${
             showMobileMap ? "block" : "hidden md:block"
           }`}
+          style={{ height: "calc(100vh - 144px)" }}
         >
           <Map
             properties={filteredProperties}
@@ -215,9 +216,10 @@ function SearchContent() {
 
         {/* Right Side: Properties List Grid */}
         <div
-          className={`w-full md:w-1/2 h-full overflow-y-auto bg-white dark:bg-[#090d16] p-6 space-y-6 ${
+          className={`w-full md:w-1/2 overflow-y-auto bg-white dark:bg-[#090d16] p-6 space-y-6 ${
             showMobileMap ? "hidden md:block" : "block"
           }`}
+          style={{ height: "calc(100vh - 144px)" }}
         >
           <div className="flex justify-between items-center">
             <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
