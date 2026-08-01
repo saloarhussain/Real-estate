@@ -66,15 +66,12 @@ export default function CustomMap({ properties, selectedProperty, onSelectProper
     }).format(val);
   };
 
-  // Determine initial center and zoom based on props
-  const defaultCenter = selectedProperty 
-    ? ([selectedProperty.lat, selectedProperty.lng] as [number, number]) 
-    : (cityCenters[centerCity] || cityCenters.all);
-    
-  const defaultZoom = selectedProperty ? 14 : (centerCity === "all" ? 5 : 12);
+  // Determine initial center and zoom based only on the selected city (remains still on hover)
+  const defaultCenter = cityCenters[centerCity] || cityCenters.all;
+  const defaultZoom = centerCity === "all" ? 5 : 12;
 
-  // Change key to force a clean remount when programmatically centering the map
-  const mapKey = `${centerCity}-${selectedProperty?.id || "none"}`;
+  // Change key to force a clean remount ONLY when changing the city filter
+  const mapKey = centerCity;
 
   return (
     <div ref={containerRef} className="w-full h-full relative overflow-hidden bg-slate-900">
