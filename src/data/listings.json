@@ -1,0 +1,179 @@
+[
+  {
+    "id": "prop-1",
+    "title": "Seaside Luxury Penthouse",
+    "price": 65000000,
+    "address": "Skyline Heights, Worli Sea Face, Worli",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "zipCode": "400018",
+    "beds": 3,
+    "baths": 3.5,
+    "sqft": 2400,
+    "type": "Penthouse",
+    "yearBuilt": 2022,
+    "lat": 18.9986,
+    "lng": 72.8174,
+    "images": [
+      "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "description": "Experience unparalleled luxury with breathtaking, unobstructed views of the Arabian Sea and the Bandra-Worli Sea Link. This ultra-modern penthouse features a private elevator access, double-height ceilings, a sprawling wrap-around terrace, custom Italian marble flooring, and smart automation throughout. Residents enjoy five-star amenities including an infinity pool, private theater, and 24/7 concierge service.",
+    "features": ["Sea View", "Private Elevator", "Wrap-around Terrace", "Smart Home Tech", "Concierge Service", "Infinity Pool"],
+    "zestimate": 65500000,
+    "agent": {
+      "name": "Rajesh Mehta",
+      "phone": "+91 98200 12345",
+      "email": "rajesh@luxuryhomes.in",
+      "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=300&q=80"
+    }
+  },
+  {
+    "id": "prop-2",
+    "title": "Modernist Courtyard Villa",
+    "price": 42000000,
+    "address": "12th Main Road, Indiranagar",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "zipCode": "560038",
+    "beds": 4,
+    "baths": 4,
+    "sqft": 3500,
+    "type": "Villa",
+    "yearBuilt": 2023,
+    "lat": 12.9719,
+    "lng": 77.6412,
+    "images": [
+      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "description": "Nestled in the heart of Bangalore's most vibrant residential zone, this custom-built architectural marvel combines minimalist concrete facades with warm teak wood detailing. Built around a central double-height open courtyard, the villa is flooded with natural light. Complete with a modular chef's kitchen, private home office, rooftop garden bar, and organic vertical plantation walls.",
+    "features": ["Central Courtyard", "Rooftop Garden", "Vertical Garden", "Home Office", "Teak Detailing", "Modular Kitchen"],
+    "zestimate": 41800000,
+    "agent": {
+      "name": "Priyanka Nair",
+      "phone": "+91 98860 54321",
+      "email": "priyanka@luxuryhomes.in",
+      "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80"
+    }
+  },
+  {
+    "id": "prop-3",
+    "title": "Sky-High Duplex Apartment",
+    "price": 28000000,
+    "address": "Apex Towers, Koramangala 3rd Block",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "zipCode": "560034",
+    "beds": 3,
+    "baths": 3,
+    "sqft": 2100,
+    "type": "Apartment",
+    "yearBuilt": 2021,
+    "lat": 12.9352,
+    "lng": 77.6244,
+    "images": [
+      "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "description": "This beautifully finished duplex apartment features high ceilings and panoramic views of the city skyline. It boasts custom marble flooring, premium bath fittings, a state-of-the-art home theater nook, and an expansive double-volume living room. Located in a gated secure enclave with swimming pool, badminton court, and yoga deck.",
+    "features": ["Duplex", "City Skyline Views", "Home Theater Nook", "Double-volume Living Room", "Clubhouse Access"],
+    "zestimate": 28500000,
+    "agent": {
+      "name": "Priyanka Nair",
+      "phone": "+91 98860 54321",
+      "email": "priyanka@luxuryhomes.in",
+      "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80"
+    }
+  },
+  {
+    "id": "prop-4",
+    "title": "Bungalow in Diplomatic Enclave",
+    "price": 145000000,
+    "address": "Blocks C, Vasant Vihar",
+    "city": "Delhi",
+    "state": "Delhi",
+    "zipCode": "110057",
+    "beds": 5,
+    "baths": 6,
+    "sqft": 6200,
+    "type": "Villa",
+    "yearBuilt": 2019,
+    "lat": 28.5604,
+    "lng": 77.1627,
+    "images": [
+      "https://images.unsplash.com/photo-1600585154363-67eb9e2e2099?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "description": "An exquisite, independent bungalow situated in Delhi's ultra-premium Vasant Vihar. This sprawling estate stands on a 500 sq. yard plot, boasting a manicured front lawn, an elevator, basement multi-purpose lounge, solar power grid setup, and separate staff quarters. Secured with military-grade perimeter security and located a short drive from the embassies.",
+    "features": ["Manicured Lawn", "Elevator", "Basement Lounge", "Solar Panels", "Staff Quarters", "Diplomatic Security"],
+    "zestimate": 147000000,
+    "agent": {
+      "name": "Amit Sharma",
+      "phone": "+91 98110 56789",
+      "email": "amit@luxuryhomes.in",
+      "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
+    }
+  },
+  {
+    "id": "prop-5",
+    "title": "Tropical Heritage Villa",
+    "price": 55000000,
+    "address": "Baga-Anjuna Hill Road, Anjuna",
+    "city": "Goa",
+    "state": "Goa",
+    "zipCode": "403509",
+    "beds": 3,
+    "baths": 4,
+    "sqft": 2800,
+    "type": "Villa",
+    "yearBuilt": 2020,
+    "lat": 15.5900,
+    "lng": 73.7420,
+    "images": [
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "description": "A charming Portuguese-style heritage villa fused with contemporary open-plan layouts. Surrounded by lush coconut groves, this villa has a private swimming pool, exposed laterite stone walls, high rafter ceilings, and an extensive outdoor dining pavilion. Located just a 5-minute drive from the iconic beaches of North Goa.",
+    "features": ["Portuguese Architecture", "Private Swimming Pool", "Outdoor Dining Pavilion", "Lush Coconut Grove", "Exposed Stone Walls"],
+    "zestimate": 54500000,
+    "agent": {
+      "name": "Amit Sharma",
+      "phone": "+91 98110 56789",
+      "email": "amit@luxuryhomes.in",
+      "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80"
+    }
+  },
+  {
+    "id": "prop-6",
+    "title": "Designer Duplex Penthouse",
+    "price": 38000000,
+    "address": "Carter Road Promenade, Bandra West",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "zipCode": "400050",
+    "beds": 2,
+    "baths": 2.5,
+    "sqft": 1600,
+    "type": "Penthouse",
+    "yearBuilt": 2023,
+    "lat": 19.0596,
+    "lng": 72.8295,
+    "images": [
+      "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80"
+    ],
+    "description": "Designed by a world-renowned architectural studio, this duplex penthouse features dramatic curved glass walls, floating glass stairs, and custom oak woodwork. The upper level opens onto a private sky terrace equipped with an outdoor jacuzzi, looking straight onto the sunset over the Bandra coast. A stone's throw from the city's finest dining and cultural hotspots.",
+    "features": ["Curved Glass Walls", "Outdoor Jacuzzi", "Sky Terrace", "Floating Staircase", "Sunset Coastal Views"],
+    "zestimate": 38500000,
+    "agent": {
+      "name": "Rajesh Mehta",
+      "phone": "+91 98200 12345",
+      "email": "rajesh@luxuryhomes.in",
+      "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=300&q=80"
+    }
+  }
+]
