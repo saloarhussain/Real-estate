@@ -91,6 +91,22 @@ function SearchContent() {
     return listings;
   }, [city, searchQuery, maxPrice, minBeds, propType]);
 
+  // Dynamically resolve the active city boundary to display based on filtered results or query keywords
+  const activeCity = useMemo(() => {
+    if (city !== "all") return city;
+    if (filteredProperties.length > 0) {
+      const firstCity = filteredProperties[0].city;
+      const allSame = filteredProperties.every((p) => p.city === firstCity);
+      if (allSame) return firstCity;
+    }
+    const queryLower = searchQuery.toLowerCase();
+    if (queryLower.includes("mumbai") || queryLower.includes("worli") || queryLower.includes("bandra")) return "Mumbai";
+    if (queryLower.includes("bangalore") || queryLower.includes("indiranagar") || queryLower.includes("koramangala")) return "Bangalore";
+    if (queryLower.includes("delhi") || queryLower.includes("vasant")) return "Delhi";
+    if (queryLower.includes("goa")) return "Goa";
+    return "all";
+  }, [city, filteredProperties, searchQuery]);
+
   // Format currency helper
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -213,7 +229,7 @@ function SearchContent() {
             properties={filteredProperties}
             selectedProperty={selectedProperty}
             onSelectProperty={setSelectedProperty}
-            centerCity={city}
+            centerCity={activeCity}
           />
         </div>
 
