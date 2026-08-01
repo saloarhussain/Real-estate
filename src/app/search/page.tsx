@@ -46,6 +46,14 @@ function SearchContent() {
   // View state (mobile toggle between list and map)
   const [showMobileMap, setShowMobileMap] = useState(false);
 
+  // Lock body scrolling when search page is active to keep the map sticky
+  React.useEffect(() => {
+    document.body.classList.add("overflow-hidden");
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+    };
+  }, []);
+
   // Filter listings dynamically using useMemo (avoiding setState in useEffect cascading renders)
   const filteredProperties = useMemo(() => {
     let listings = listingsData as Property[];
