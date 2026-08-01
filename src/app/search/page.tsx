@@ -193,13 +193,13 @@ function SearchContent() {
         </div>
       </section>
 
-      {/* Main Split Pane Layout */}
-      <div className="flex flex-1 h-0 min-h-0 relative overflow-hidden">
+      {/* Main Split Pane Layout - viewport height locked on desktop */}
+      <div className="flex flex-col md:flex-row flex-1 h-[calc(100vh-144px)] overflow-hidden relative">
         
         {/* Left Side: Interactive Map */}
         <div
-          className={`absolute md:relative inset-0 md:w-1/2 lg:w-1/2 h-full overflow-hidden transition-all duration-300 z-10 ${
-            showMobileMap ? "translate-x-0" : "translate-x-full md:translate-x-0"
+          className={`w-full md:w-1/2 h-full overflow-hidden relative bg-slate-900 ${
+            showMobileMap ? "block" : "hidden md:block"
           }`}
         >
           <Map
@@ -211,7 +211,11 @@ function SearchContent() {
         </div>
 
         {/* Right Side: Properties List Grid */}
-        <div className="w-full md:w-1/2 lg:w-1/2 h-full overflow-y-auto bg-white dark:bg-[#090d16] p-6 space-y-6">
+        <div
+          className={`w-full md:w-1/2 h-full overflow-y-auto bg-white dark:bg-[#090d16] p-6 space-y-6 ${
+            showMobileMap ? "hidden md:block" : "block"
+          }`}
+        >
           <div className="flex justify-between items-center">
             <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
               Found <span className="text-blue-600 font-extrabold">{filteredProperties.length}</span> matching properties
