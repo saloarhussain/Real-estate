@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { BarChart, Bar, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { IndianRupee, Calendar, Percent, Clock, Wallet, LayoutGrid, ChevronDown, ChevronRight } from "lucide-react";
+import { IndianRupee, Calendar, Percent, Clock, Wallet, LayoutGrid, ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -20,6 +20,13 @@ function fmtDate(month: number, startMonthIdx: number, startYear: number) {
   return `${MONTHS[m]} ${y}`;
 }
 
+interface LumpsumItem {
+  id: string;
+  amount: number;
+  monthIdx: number;
+  year: number;
+}
+
 interface SimulateParams {
   principal: number;
   annualRate: number;
@@ -30,12 +37,8 @@ interface SimulateParams {
   prepayAmount: number;
   prepayMonthsOfYear: number[];
   mode: string;
-  lumpsum: {
-    enabled: boolean;
-    amount: number;
-    monthIdx: number;
-    year: number;
-  };
+  lumpsumEnabled: boolean;
+  lumpsums: LumpsumItem[];
 }
 
 interface SimulatedRow {
@@ -57,7 +60,7 @@ interface YearlyRow {
   balance: number;
 }
 
-function simulate({ principal, annualRate, tenureYears, startMonthIdx, startYear, prepay, prepayAmount, prepayMonthsOfYear, mode, lumpsum }: SimulateParams) {
+function simulate({ principal, annualRate, tenureYears, startMonthIdx, startYear, prepay, prepayAmount, prepayMonthsOfYear, mode, lumpsumEnabled, lumpsums }: SimulateParams) {
   const r = annualRate / 12 / 100;
   const totalMonths = tenureYears * 12;
   const emiInit = r === 0 ? principal / totalMonths : (principal * r * Math.pow(1 + r, totalMonths)) / (Math.pow(1 + r, totalMonths) - 1);
@@ -88,10 +91,14 @@ function simulate({ principal, annualRate, tenureYears, startMonthIdx, startYear
       balance -= applied;
     }
 
-    if (lumpsum && lumpsum.enabled && balance > 0 && month < totalMonths && calMonthIdx === lumpsum.monthIdx && calYear === lumpsum.year) {
-      const applied = Math.min(lumpsum.amount, balance);
-      prepayThisMonth += applied;
-      balance -= applied;
+    if (lumpsumEnabled && lumpsums && lumpsums.length > 0) {
+      lumpsums.forEach((item) => {
+        if (balance > 0 && month < totalMonths && calMonthIdx === item.monthIdx && calYear === item.year) {
+          const applied = Math.min(item.amount, balance);
+          prepayThisMonth += applied;
+          balance -= applied;
+        }
+      });
     }
 
     if (prepayThisMonth > 0) {
@@ -145,16 +152,36 @@ export default function AmortizationCalculator() {
   const [granularity, setGranularity] = useState<string>("yearly"); // "monthly" | "yearly"
 
   const [lumpsumEnabled, setLumpsumEnabled] = useState<boolean>(false);
-  const [lumpsumAmount, setLumpsumAmount] = useState<number>(2500000);
-  const [lumpsumMonthIdx, setLumpsumMonthIdx] = useState<number>(startMonthIdx);
-  const [lumpsumYear, setLumpsumYear] = useState<number>(startYear + 1);
+  const [lumpsums, setLumpsums] = useState<LumpsumItem[]>([
+    { id: "1", amount: 2500000, monthIdx: startMonthIdx, year: startYear + 1 }
+  ]);
+
+  const addLumpsum = () => {
+    const nextYear = lumpsums.length > 0 ? lumpsums[lumpsums.length - 1].year + 1 : startYear + 1;
+    setLumpsums([
+      ...lumpsums,
+      {
+        id: Math.random().toString(36).substring(2, 9),
+        amount: 500000,
+        monthIdx: startMonthIdx,
+        year: Math.min(startYear + tenure, nextYear)
+      }
+    ]);
+  };
+
+  const removeLumpsum = (id: string) => {
+    setLumpsums(lumpsums.filter((x) => x.id !== id));
+  };
+
+  const updateLumpsum = (id: string, key: keyof LumpsumItem, value: any) => {
+    setLumpsums(lumpsums.map((x) => x.id === id ? { ...x, [key]: value } : x));
+  };
 
   const months = prepayFrequency === "once" ? [month1] : (month1 === month2 ? [month1] : [month1, month2]);
-  const lumpsum = { enabled: lumpsumEnabled, amount: lumpsumAmount, monthIdx: lumpsumMonthIdx, year: lumpsumYear };
 
   const result = useMemo(
-    () => simulate({ principal, annualRate: rate, tenureYears: tenure, startMonthIdx, startYear, prepay, prepayAmount, prepayMonthsOfYear: months, mode, lumpsum }),
-    [principal, rate, tenure, startMonthIdx, startYear, prepay, prepayAmount, prepayFrequency, month1, month2, mode, lumpsumEnabled, lumpsumAmount, lumpsumMonthIdx, lumpsumYear]
+    () => simulate({ principal, annualRate: rate, tenureYears: tenure, startMonthIdx, startYear, prepay, prepayAmount, prepayMonthsOfYear: months, mode, lumpsumEnabled, lumpsums }),
+    [principal, rate, tenure, startMonthIdx, startYear, prepay, prepayAmount, prepayFrequency, month1, month2, mode, lumpsumEnabled, lumpsums]
   );
 
   const yearlyRows = useMemo(() => aggregateYearly(result.rows, startMonthIdx, startYear), [result.rows, startMonthIdx, startYear]);
@@ -310,29 +337,51 @@ export default function AmortizationCalculator() {
             <div className="h-px" style={{ background: "var(--line)" }} />
 
             <div className="flex items-center justify-between">
-              <div className="amz-label flex items-center gap-1.5" style={{ color: "var(--text)" }}><IndianRupee size={14} /> One-time lumpsum</div>
+              <div className="amz-label flex items-center gap-1.5" style={{ color: "var(--text)" }}><IndianRupee size={14} /> Lumpsum prepayments</div>
               <button onClick={() => setLumpsumEnabled(!lumpsumEnabled)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer border-none ${lumpsumEnabled ? "amz-toggle-on" : "amz-toggle-off"}`}>
                 {lumpsumEnabled ? "ON" : "OFF"}
               </button>
             </div>
             {lumpsumEnabled && (
               <div className="space-y-4">
-                <div>
-                  <div className="amz-label mb-2">Amount</div>
-                  <input type="number" className={`${inputCls} amz-input amz-mono`} value={lumpsumAmount} min={0} step={10000}
-                    onChange={(e) => setLumpsumAmount(Math.max(0, Number(e.target.value)))} />
-                </div>
-                <div>
-                  <div className="amz-label mb-2 flex items-center gap-1.5"><Calendar size={13} /> When you'll pay it</div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <select className={`${inputCls} amz-input`} value={lumpsumMonthIdx} onChange={(e) => setLumpsumMonthIdx(Number(e.target.value))}>
-                      {MONTHS.map((m, i) => <option key={m} value={i}>{m}</option>)}
-                    </select>
-                    <input type="number" className={`${inputCls} amz-input amz-mono`} value={lumpsumYear} onChange={(e) => setLumpsumYear(Number(e.target.value))} />
+                {lumpsums.map((item, index) => (
+                  <div key={item.id} className="p-3.5 rounded-xl border space-y-3 relative" style={{ borderColor: "var(--line)", background: "rgba(255,255,255,0.015)" }}>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-semibold tracking-wider uppercase" style={{ color: "var(--gold)" }}>Lumpsum #{index + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeLumpsum(item.id)}
+                        className="p-1 rounded hover:bg-red-950/30 text-red-400 hover:text-red-300 transition-colors cursor-pointer border-none bg-transparent"
+                        title="Remove lumpsum"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                    <div>
+                      <div className="amz-label mb-1.5">Amount</div>
+                      <input type="number" className={`${inputCls} amz-input amz-mono`} value={item.amount} min={0} step={10000}
+                        onChange={(e) => updateLumpsum(item.id, "amount", Math.max(0, Number(e.target.value)))} />
+                    </div>
+                    <div>
+                      <div className="amz-label mb-1.5 flex items-center gap-1.5"><Calendar size={13} /> When you'll pay it</div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <select className={`${inputCls} amz-input`} value={item.monthIdx} onChange={(e) => updateLumpsum(item.id, "monthIdx", Number(e.target.value))}>
+                          {MONTHS.map((m, i) => <option key={m} value={i}>{m}</option>)}
+                        </select>
+                        <input type="number" className={`${inputCls} amz-input amz-mono`} value={item.year} onChange={(e) => updateLumpsum(item.id, "year", Number(e.target.value))} />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addLumpsum}
+                  className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-sm transition-colors cursor-pointer border-none amz-seg hover:bg-[rgba(216,174,85,0.1)] hover:text-[var(--gold)]"
+                >
+                  <Plus size={14} /> Add lumpsum amount
+                </button>
                 <p className="text-xs" style={{ color: "var(--text-dim)" }}>
-                  Applied once, on top of any recurring prepayment above — e.g. a bonus, gift, or sale proceeds landing at a specific time.
+                  Applied on top of any recurring prepayment above — e.g. a bonus, gift, or sale proceeds landing at a specific time.
                 </p>
               </div>
             )}
