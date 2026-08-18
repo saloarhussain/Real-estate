@@ -239,7 +239,7 @@ export default function AmortizationCalculator() {
         select { color-scheme: dark; }
       `}</style>
 
-      <div className="amz-root p-5 sm:p-8 rounded-2xl">
+      <div className="amz-root px-3 py-5 sm:p-8 rounded-2xl">
         <div className="mb-8">
           <div className="amz-label mb-2 flex items-center gap-1.5" style={{ color: "var(--gold)" }}><LayoutGrid size={13} /> Amortization breakdown</div>
           <h1 className="amz-display text-3xl sm:text-4xl font-semibold tracking-tight">Principal vs. Interest, Month by Month</h1>
@@ -250,7 +250,7 @@ export default function AmortizationCalculator() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
           {/* Inputs */}
-          <div className="amz-panel p-5 sm:p-6 space-y-6 h-fit text-left">
+          <div className="amz-panel px-4 py-5 sm:p-6 space-y-6 h-fit text-left">
             <div>
               <div className="amz-label mb-2 flex items-center gap-1.5"><IndianRupee size={13} /> Loan amount</div>
               <input type="number" className={`${inputCls} amz-input amz-mono`} value={principal} min={100000} step={10000}
@@ -401,7 +401,7 @@ export default function AmortizationCalculator() {
           {/* Results */}
           <div className="space-y-6 text-left">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <div className="amz-panel p-4">
+              <div className="amz-panel px-3 py-4 sm:p-4">
                 <div className="amz-label">Starting EMI</div>
                 <div className="amz-mono text-lg mt-1 font-medium">{fmtINR(result.emiInit)}</div>
               </div>
@@ -416,7 +416,7 @@ export default function AmortizationCalculator() {
             </div>
 
             {/* Chart */}
-            <div className="amz-panel p-4 sm:p-5">
+            <div className="amz-panel px-3 py-4 sm:p-5">
               <div className="amz-label mb-3">EMI, principal, interest & prepayment — {granularity === "yearly" ? "by year" : "by month (sampled)"}</div>
               <div style={{ width: "100%", height: 300 }}>
                 <ResponsiveContainer>
@@ -442,7 +442,7 @@ export default function AmortizationCalculator() {
             </div>
 
             {/* Table */}
-            <div className="amz-panel p-4 sm:p-5">
+            <div className="amz-panel px-3 py-4 sm:p-5">
               <div className="amz-label mb-3">Year-by-year breakdown — click a row to expand its months</div>
               <div className="overflow-auto amz-scrollbar" style={{ maxHeight: 460 }}>
                 <table className="w-full text-sm amz-mono">

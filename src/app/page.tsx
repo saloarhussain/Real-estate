@@ -392,7 +392,7 @@ export default function Home() {
       </section>
 
       {/* Mortgage Calculator Section */}
-      <section id="mortgage-calculator" className="py-24 max-w-7xl mx-auto px-6 w-full">
+      <section id="mortgage-calculator" className="py-24 max-w-7xl mx-auto px-2 sm:px-6 w-full">
         <AmortizationCalculator />
       </section>
 
