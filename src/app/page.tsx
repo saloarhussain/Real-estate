@@ -8,6 +8,7 @@ import { Search, MapPin, Calculator, TrendingUp, Key, Sparkles, Building, Phone,
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getCombinedListings } from "@/data/listingsHelper";
+import AmortizationCalculator from "@/components/AmortizationCalculator";
 
 export default function Home() {
   const router = useRouter();
@@ -24,11 +25,7 @@ export default function Home() {
   const [estCondition, setEstCondition] = useState("premium");
   const [valuationResult, setValuationResult] = useState<number | null>(null);
 
-  // Mortgage Calculator state
-  const [homePrice, setHomePrice] = useState(50000000); // 5 Cr
-  const [downPaymentPercent, setDownPaymentPercent] = useState(20);
-  const [interestRate, setInterestRate] = useState(8.5);
-  const [loanTermYears, setLoanTermYears] = useState(20);
+
 
   // Dynamic listings state
   const [listings, setListings] = useState<any[]>([]);
@@ -64,25 +61,7 @@ export default function Home() {
     setValuationResult(Math.round(totalEstimate));
   };
 
-  // Mortgage Payment Calculation Formula
-  // M = P * [i * (1 + i)^n] / [(1 + i)^n - 1]
-  const calculateMonthlyPayment = () => {
-    const principal = homePrice * (1 - downPaymentPercent / 100);
-    const monthlyRate = interestRate / 12 / 100;
-    const numberOfPayments = loanTermYears * 12;
 
-    if (monthlyRate === 0) return principal / numberOfPayments;
-
-    const monthlyPayment =
-      (principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments))) /
-      (Math.pow(1 + monthlyRate, numberOfPayments) - 1);
-    
-    return isNaN(monthlyPayment) ? 0 : Math.round(monthlyPayment);
-  };
-
-  const monthlyPayment = calculateMonthlyPayment();
-  const downPaymentAmount = Math.round(homePrice * (downPaymentPercent / 100));
-  const loanAmount = homePrice - downPaymentAmount;
 
   // Format currency helper
   const formatCurrency = (val: number) => {
@@ -414,124 +393,7 @@ export default function Home() {
 
       {/* Mortgage Calculator Section */}
       <section id="mortgage-calculator" className="py-24 max-w-7xl mx-auto px-6 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Card calculations */}
-          <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200/50 dark:border-slate-800/50 shadow-2xl order-2 lg:order-1 space-y-6">
-            <h3 className="font-extrabold text-xl text-slate-900 dark:text-white tracking-tight">Mortgage Estimator</h3>
-            
-            <div className="space-y-4">
-              {/* Home Price Input */}
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Property Value</label>
-                  <span className="text-xs font-black text-blue-600">{formatCurrency(homePrice)}</span>
-                </div>
-                <input
-                  type="range"
-                  min="2000000"
-                  max="200000000"
-                  step="1000000"
-                  value={homePrice}
-                  onChange={(e) => setHomePrice(parseInt(e.target.value))}
-                  className="w-full accent-blue-600 cursor-ew-resize"
-                />
-              </div>
-
-              {/* Down Payment slider */}
-              <div>
-                <div className="flex justify-between items-center mb-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Down Payment</label>
-                  <span className="text-xs font-black text-slate-800 dark:text-white">
-                    {downPaymentPercent}% ({formatCurrency(downPaymentAmount)})
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="5"
-                  max="80"
-                  step="5"
-                  value={downPaymentPercent}
-                  onChange={(e) => setDownPaymentPercent(parseInt(e.target.value))}
-                  className="w-full accent-blue-600 cursor-ew-resize"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Interest Rate */}
-                <div>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Interest Rate</label>
-                    <span className="text-xs font-bold text-blue-600">{interestRate}%</span>
-                  </div>
-                  <input
-                    type="number"
-                    min="1"
-                    max="20"
-                    step="0.1"
-                    value={interestRate}
-                    onChange={(e) => setInterestRate(parseFloat(e.target.value) || 0)}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-3 rounded-xl text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500/25 outline-none transition-all"
-                  />
-                </div>
-
-                {/* Term */}
-                <div>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Loan Term</label>
-                    <span className="text-xs font-bold text-blue-600">{loanTermYears} Years</span>
-                  </div>
-                  <select
-                    value={loanTermYears}
-                    onChange={(e) => setLoanTermYears(parseInt(e.target.value))}
-                    className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-3 rounded-xl text-sm font-semibold text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500/25 outline-none transition-all cursor-pointer"
-                  >
-                    <option value={10}>10 Years</option>
-                    <option value={15}>15 Years</option>
-                    <option value={20}>20 Years</option>
-                    <option value={30}>30 Years</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Calculations break out */}
-            <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 flex flex-col items-center justify-center text-center">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Monthly Mortgage Payment</p>
-              <h4 className="text-3xl font-black text-slate-900 dark:text-white">{formatCurrency(monthlyPayment)}</h4>
-              <div className="w-full border-t border-slate-200 dark:border-slate-800 my-4"></div>
-              <div className="grid grid-cols-2 gap-8 text-left w-full text-xs">
-                <div>
-                  <span className="text-slate-400 font-medium">Principal & Interest</span>
-                  <p className="font-extrabold text-slate-800 dark:text-white">{formatCurrency(monthlyPayment)}</p>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-medium">Total Loan Amount</span>
-                  <p className="font-extrabold text-slate-800 dark:text-white">{formatCurrency(loanAmount)}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Calculator explanations */}
-          <div className="space-y-6 order-1 lg:order-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest">
-              <Key className="h-3.5 w-3.5" /> Mortgage Analytics
-            </span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
-              Detailed financial estimations, optimized
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-light text-base">
-              Calculate your budget easily by understanding exactly how down payments, property price, and interest rates affect your ongoing monthly outlays. The calculator uses standard mathematical loan amortization models.
-            </p>
-            <div className="flex gap-4">
-              <div className="p-3 rounded-xl bg-blue-600/10 text-blue-500 h-fit"><Phone className="h-5 w-5" /></div>
-              <div className="space-y-1">
-                <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">Connect with our Agents</h4>
-                <p className="text-xs text-slate-500 max-w-sm">Ready to buy? Our agents can put you in touch with leading mortgage consultants in India for low interest rate lock-ins.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AmortizationCalculator />
       </section>
 
       <Footer />
