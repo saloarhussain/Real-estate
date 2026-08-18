@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Search, MapPin, Calculator, TrendingUp, Key, Sparkles, Building, Phone, ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import listingsData from "@/data/listings.json";
+import { getCombinedListings } from "@/data/listingsHelper";
 
 export default function Home() {
   const router = useRouter();
@@ -29,6 +29,13 @@ export default function Home() {
   const [downPaymentPercent, setDownPaymentPercent] = useState(20);
   const [interestRate, setInterestRate] = useState(8.5);
   const [loanTermYears, setLoanTermYears] = useState(20);
+
+  // Dynamic listings state
+  const [listings, setListings] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    setListings(getCombinedListings());
+  }, []);
 
   // Handle Search Submission
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -87,7 +94,7 @@ export default function Home() {
   };
 
   // Curated list of 3 featured properties
-  const featuredListings = listingsData.slice(0, 3);
+  const featuredListings = listings.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#090d16] flex flex-col font-sans transition-colors duration-300">

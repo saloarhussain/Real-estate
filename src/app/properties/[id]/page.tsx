@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import listingsData from "@/data/listings.json";
+import { getListingById } from "@/data/listingsHelper";
 
 interface Property {
   id: string;
@@ -45,9 +45,9 @@ export default function PropertyDetails() {
   const router = useRouter();
   const id = params.id as string;
 
-  // Load listing detail data on the fly (avoiding setState in useEffect cascading renders)
+  // Load listing detail data dynamically from helper
   const property = useMemo(() => {
-    return (listingsData.find((p) => p.id === id) as Property) || null;
+    return (getListingById(id) as Property) || null;
   }, [id]);
 
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -96,6 +96,28 @@ export default function PropertyDetails() {
   const handleLeadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!leadName || !leadEmail) return;
+
+    // Create the inquiry object
+    const newInquiry = {
+      id: "inq-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+      propertyId: property.id,
+      propertyTitle: property.title,
+      propertyImage: property.images[0] || "",
+      agentEmail: property.agent.email,
+      name: leadName,
+      email: leadEmail,
+      phone: leadPhone,
+      message: leadMessage,
+      timestamp: new Date().toISOString(),
+      status: "new"
+    };
+
+    try {
+      const existingInquiries = JSON.parse(localStorage.getItem("homespire_inquiries") || "[]");
+      localStorage.setItem("homespire_inquiries", JSON.stringify([newInquiry, ...existingInquiries]));
+    } catch (err) {
+      console.error("Error saving inquiry", err);
+    }
 
     setIsSubmitted(true);
     

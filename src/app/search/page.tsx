@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, Grid, ArrowUpRight, Search as SearchIcon, X, Heart } from "lucide-react";
 import Map from "@/components/Map";
 import Header from "@/components/Header";
-import listingsData from "@/data/listings.json";
+import { getCombinedListings } from "@/data/listingsHelper";
 
 interface Property {
   id: string;
@@ -47,9 +47,13 @@ function SearchContent() {
   // View state (mobile toggle between list and map)
   const [showMobileMap, setShowMobileMap] = useState(false);
 
+  // Dynamic listings state
+  const [listings, setListings] = useState<Property[]>([]);
+
   // Lock body scrolling when search page is active to keep the map sticky
   React.useEffect(() => {
     document.body.classList.add("overflow-hidden");
+    setListings(getCombinedListings() as Property[]);
     return () => {
       document.body.classList.remove("overflow-hidden");
     };
@@ -57,17 +61,17 @@ function SearchContent() {
 
   // Filter listings dynamically using useMemo (avoiding setState in useEffect cascading renders)
   const filteredProperties = useMemo(() => {
-    let listings = listingsData as Property[];
+    let activeListings = listings;
 
     // 1. Filter by City
     if (city !== "all") {
-      listings = listings.filter((p) => p.city.toLowerCase() === city.toLowerCase());
+      activeListings = activeListings.filter((p) => p.city.toLowerCase() === city.toLowerCase());
     }
 
     // 2. Filter by search query text (match title, address, description)
     if (searchQuery.trim() !== "") {
       const q = searchQuery.toLowerCase();
-      listings = listings.filter(
+      activeListings = activeListings.filter(
         (p) =>
           p.title.toLowerCase().includes(q) ||
           p.address.toLowerCase().includes(q) ||
@@ -76,20 +80,20 @@ function SearchContent() {
     }
 
     // 3. Filter by Max Price
-    listings = listings.filter((p) => p.price <= maxPrice);
+    activeListings = activeListings.filter((p) => p.price <= maxPrice);
 
     // 4. Filter by Minimum Bedrooms
     if (minBeds > 0) {
-      listings = listings.filter((p) => p.beds >= minBeds);
+      activeListings = activeListings.filter((p) => p.beds >= minBeds);
     }
 
     // 5. Filter by Property Type
     if (propType !== "all") {
-      listings = listings.filter((p) => p.type.toLowerCase() === propType.toLowerCase());
+      activeListings = activeListings.filter((p) => p.type.toLowerCase() === propType.toLowerCase());
     }
 
-    return listings;
-  }, [city, searchQuery, maxPrice, minBeds, propType]);
+    return activeListings;
+  }, [city, searchQuery, maxPrice, minBeds, propType, listings]);
 
   // Dynamically resolve the active city boundary to display based on filtered results or query keywords
   const activeCity = useMemo(() => {

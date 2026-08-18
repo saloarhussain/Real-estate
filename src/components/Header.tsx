@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Menu, X, Mail, Lock, User, LogOut, ChevronDown } from "lucide-react";
+import { Home, Menu, X, Mail, Lock, User, LogOut, ChevronDown, LayoutGrid } from "lucide-react";
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +22,7 @@ export default function Header() {
   // Global Auth State
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [userRole, setUserRole] = useState("Buyer");
   const pathname = usePathname();
 
   // Load auth state from localStorage on client-side mount
@@ -29,9 +30,11 @@ export default function Header() {
     const timer = setTimeout(() => {
       const user = localStorage.getItem("homespire_user");
       const email = localStorage.getItem("homespire_user_email");
+      const role = localStorage.getItem("homespire_user_role") || "Buyer";
       if (user && email) {
         setIsLoggedIn(true);
         setUserEmail(email);
+        setUserRole(role);
       }
     }, 0);
     return () => clearTimeout(timer);
@@ -43,6 +46,7 @@ export default function Header() {
     { name: "Sell", href: "/#estimator" },
     { name: "Get a Mortgage", href: "/#mortgage-calculator" },
     { name: "Find an Agent", href: "/search" },
+    ...(isLoggedIn && userRole === "Agent" ? [{ name: "Agent Dashboard", href: "/dashboard" }] : []),
   ];
 
   const rightNavItems = [
@@ -67,11 +71,40 @@ export default function Header() {
       return;
     }
 
+    let detectedRole = "Buyer";
+    if (authTab === "signup") {
+      detectedRole = roleInput;
+      // Store custom registered users
+      try {
+        const registeredUsers = JSON.parse(localStorage.getItem("homespire_registered_users") || "[]");
+        if (!registeredUsers.some((u: any) => u.email.toLowerCase() === emailInput.toLowerCase())) {
+          registeredUsers.push({ email: emailInput, role: roleInput });
+          localStorage.setItem("homespire_registered_users", JSON.stringify(registeredUsers));
+        }
+      } catch (err) {}
+    } else {
+      // signin detection
+      const agentEmails = ["rajesh@luxuryhomes.in", "priyanka@luxuryhomes.in", "amit@luxuryhomes.in"];
+      if (agentEmails.includes(emailInput.toLowerCase())) {
+        detectedRole = "Agent";
+      } else {
+        try {
+          const registeredUsers = JSON.parse(localStorage.getItem("homespire_registered_users") || "[]");
+          const foundUser = registeredUsers.find((u: any) => u.email.toLowerCase() === emailInput.toLowerCase());
+          if (foundUser) {
+            detectedRole = foundUser.role;
+          }
+        } catch (err) {}
+      }
+    }
+
     // Save mock user session
     localStorage.setItem("homespire_user", "true");
     localStorage.setItem("homespire_user_email", emailInput);
+    localStorage.setItem("homespire_user_role", detectedRole);
     setIsLoggedIn(true);
     setUserEmail(emailInput);
+    setUserRole(detectedRole);
     
     setSuccessMsg(authTab === "signin" ? "Signed in successfully!" : "Account created successfully!");
     
@@ -88,8 +121,10 @@ export default function Header() {
   const handleSignOut = () => {
     localStorage.removeItem("homespire_user");
     localStorage.removeItem("homespire_user_email");
+    localStorage.removeItem("homespire_user_role");
     setIsLoggedIn(false);
     setUserEmail("");
+    setUserRole("Buyer");
     setIsDropdownOpen(false);
   };
 
@@ -170,6 +205,15 @@ export default function Header() {
                   >
                     <User className="h-4 w-4 text-slate-400" /> My Account
                   </Link>
+                  {userRole === "Agent" && (
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setIsDropdownOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-900 rounded-xl transition-colors"
+                    >
+                      <LayoutGrid className="h-4 w-4 text-blue-500" /> Agent Dashboard
+                    </Link>
+                  )}
                   <Link
                     href="/search"
                     onClick={() => setIsDropdownOpen(false)}
@@ -384,8 +428,10 @@ export default function Header() {
                   onClick={() => {
                     localStorage.setItem("homespire_user", "true");
                     localStorage.setItem("homespire_user_email", "google.user@gmail.com");
+                    localStorage.setItem("homespire_user_role", "Buyer");
                     setIsLoggedIn(true);
                     setUserEmail("google.user@gmail.com");
+                    setUserRole("Buyer");
                     setSuccessMsg("Signed in with Google!");
                     setTimeout(() => {
                       setIsAuthModalOpen(false);
@@ -400,8 +446,10 @@ export default function Header() {
                   onClick={() => {
                     localStorage.setItem("homespire_user", "true");
                     localStorage.setItem("homespire_user_email", "apple.user@icloud.com");
+                    localStorage.setItem("homespire_user_role", "Buyer");
                     setIsLoggedIn(true);
                     setUserEmail("apple.user@icloud.com");
+                    setUserRole("Buyer");
                     setSuccessMsg("Signed in with Apple!");
                     setTimeout(() => {
                       setIsAuthModalOpen(false);
@@ -413,6 +461,30 @@ export default function Header() {
                   <img src="https://authjs.dev/img/providers/apple.svg" alt="Apple" className="h-4 w-4 dark:invert" /> Apple
                 </button>
               </div>
+            </div>
+
+            {/* Agent Quick Demo Login */}
+            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-850 text-center">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-wider">Demo / Testing Accounts</p>
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.setItem("homespire_user", "true");
+                  localStorage.setItem("homespire_user_email", "rajesh@luxuryhomes.in");
+                  localStorage.setItem("homespire_user_role", "Agent");
+                  setIsLoggedIn(true);
+                  setUserEmail("rajesh@luxuryhomes.in");
+                  setUserRole("Agent");
+                  setSuccessMsg("Logged in as Agent Rajesh Mehta!");
+                  setTimeout(() => {
+                    setIsAuthModalOpen(false);
+                    setSuccessMsg("");
+                  }, 1200);
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition-colors text-xs font-black uppercase tracking-wider shadow-md shadow-blue-500/10 cursor-pointer"
+              >
+                Demo Login as Agent (Rajesh Mehta)
+              </button>
             </div>
           </div>
         </div>
