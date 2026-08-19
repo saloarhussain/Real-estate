@@ -62,8 +62,210 @@ export default function Dashboard() {
   const [agentEmail, setAgentEmail] = useState("");
   const [agentName, setAgentName] = useState("");
   
-  // Navigation Tabs: overview, listings, leads, calendar, commission
-  const [activeTab, setActiveTab] = useState<"overview" | "listings" | "leads" | "calendar" | "commission">("overview");
+  // Navigation Tabs: dashboard, crm-leads, messages, my-listings, analytics, calendar, marketing-kit, settings
+  const [activeTab, setActiveTab] = useState<"dashboard" | "crm-leads" | "messages" | "my-listings" | "analytics" | "calendar" | "marketing-kit" | "settings">("messages");
+
+  // Chat / Messages States
+  const [chatSearchQuery, setChatSearchQuery] = useState("");
+  const [chatSegment, setChatSegment] = useState<"all" | "unread" | "starred">("all");
+  const [chatMessages, setChatMessages] = useState<Array<{
+    id: string;
+    sender: "buyer" | "agent" | "system";
+    senderName: string;
+    avatar?: string;
+    text: string;
+    time: string;
+    interactiveCard?: {
+      title: string;
+      date: string;
+      time: string;
+      confirmed: boolean;
+    };
+  }>>([
+    {
+      id: "msg-1",
+      sender: "system",
+      senderName: "System",
+      text: "Anjali Sharma viewed the 'Seaside Luxury Penthouse' brochure.",
+      time: ""
+    },
+    {
+      id: "msg-2",
+      sender: "buyer",
+      senderName: "Anjali Sharma",
+      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuDGYoG4vgbL7-JHZCMEuudI4tzD5zAA6h4W5K3xQrf9_qXawwzjjkX2C4bqSz4m7LV924amhr1xF8z58qQ4NT0vxMeSUe1xiYj37BXvZoKrLmnWlj5ld0TX873rzLaA_D6FtMCnQeczA_xxSeBYcplvJYvhW0M-TAGzoy2pSX9KS484Tjp2QFsFCBbdC9qo9uTIJGlD8xArD7IqTDYki8XMqFqAvSsY-yjUBQcZsXEjaPrF6jJu134",
+      text: "Hi JD, I've reviewed the brochure for the Seaside Penthouse. The layout looks perfect. Is there availability to view it this Thursday?",
+      time: "10:42 AM"
+    },
+    {
+      id: "msg-3",
+      sender: "agent",
+      senderName: "JD",
+      text: "Hello Anjali, I'm glad you liked the layout. The panoramic views are even more impressive in person.",
+      time: "10:45 AM"
+    },
+    {
+      id: "msg-4",
+      sender: "agent",
+      senderName: "JD",
+      text: "I can arrange a private showing for Thursday. Would 2:00 PM or 4:30 PM work better for your schedule?",
+      time: "10:45 AM"
+    },
+    {
+      id: "msg-5",
+      sender: "agent",
+      senderName: "JD",
+      text: "Showing Proposed",
+      time: "10:46 AM",
+      interactiveCard: {
+        title: "Showing Proposed",
+        date: "Thu, Oct 24",
+        time: "2:00 PM",
+        confirmed: false
+      }
+    }
+  ]);
+  const [typedMessage, setTypedMessage] = useState("");
+  const [selectedConversationId, setSelectedConversationId] = useState("anjali");
+
+  const conversationsList = [
+    {
+      id: "anjali",
+      name: "Anjali Sharma",
+      property: "Seaside Luxury Penthouse",
+      pincodeColor: "text-vibrant-blue",
+      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuB0eEJyvRfzjnkVFAgMtdUWhhzVo69mDX3gr2_VMKI12IZEwRmoTj09eUwF30YEXIifjma8-_YxVPeYYk_DlI6iuioLMYZifBG16HfeDHh6V_xMF_fPzEC8i4EbwrTAdujvKhfpnqTnirtrkKCTHzN9qP6DPnBmyJ21MmqEKyL_NUlOL_GciZrcSR9SeaPsaydBfdNP3c1-H2b9mpwvUbKoyXMxgpzcahX6gY6pcCoFnzz0aqOHBxc",
+      lastMsg: "The layout looks perfect. Is there availability to view it this Thursday?",
+      time: "10:42 AM",
+      unread: true,
+      starred: false,
+      online: true,
+    },
+    {
+      id: "julian",
+      name: "Julian Blackwood",
+      property: "The Spire Residences, Unit 4B",
+      pincodeColor: "text-outline",
+      avatar: "JB",
+      lastMsg: "I'll have my financial team review the HOA documents.",
+      time: "Yesterday",
+      unread: false,
+      starred: false,
+      online: false,
+    },
+    {
+      id: "marcus",
+      name: "Marcus Chen",
+      property: "101 Park Ave Portfolio",
+      pincodeColor: "text-outline",
+      avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuC6pG44Wa0Nhtvr_JMTlUt7HF_OAeqNoNIrKFmyCOaeg-0v33o52qKIy6dabvu71viUHixo2-m2mN0iNx1WM0lZRhIJUgbgekbSfqDtDjCtTLsSvjF0YlVtvtipoWmQw6SPK0qrc60-7JzS4F4ZptelO8bg1dd0zLl9o5lG6PCGS2ppR11fcW0EzQji6LF96OqCwhx0srbjIJAQZ5Igf1qjv1RSf7UrPpp3vWRfZgEo5cOSVyK7LGs",
+      lastMsg: "Thanks for the market analysis. We're holding for now.",
+      time: "Tue",
+      unread: false,
+      starred: true,
+      online: false,
+    },
+    {
+      id: "elena",
+      name: "Elena Rostova",
+      property: "VIP Client",
+      pincodeColor: "text-accent-gold",
+      avatar: "ER",
+      lastMsg: "Please find the wire transfer confirmation attached.",
+      time: "Mon",
+      unread: true,
+      starred: false,
+      online: false,
+    }
+  ];
+
+  const getSelectedConversationMessages = () => {
+    if (selectedConversationId === "anjali") {
+      return chatMessages;
+    }
+    if (selectedConversationId === "julian") {
+      return [
+        {
+          id: "msg-j-1",
+          sender: "buyer" as const,
+          senderName: "Julian Blackwood",
+          text: "Hi Rajesh, I looked over the Unit 4B listing. I'll have my financial team review the HOA documents.",
+          time: "Yesterday"
+        }
+      ];
+    }
+    if (selectedConversationId === "marcus") {
+      return [
+        {
+          id: "msg-m-1",
+          sender: "buyer" as const,
+          senderName: "Marcus Chen",
+          text: "Thanks for the market analysis. We're holding for now.",
+          time: "Tue"
+        }
+      ];
+    }
+    if (selectedConversationId === "elena") {
+      return [
+        {
+          id: "msg-e-1",
+          sender: "system" as const,
+          senderName: "System",
+          text: "Elena Rostova shared a file: Wire_Transfer_Confirmation.pdf",
+          time: ""
+        },
+        {
+          id: "msg-e-2",
+          sender: "buyer" as const,
+          senderName: "Elena Rostova",
+          text: "Please find the wire transfer confirmation attached.",
+          time: "Mon"
+        }
+      ];
+    }
+    return [];
+  };
+
+  const handleSendChatMessage = () => {
+    if (!typedMessage.trim()) return;
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const newMsg = {
+      id: "msg-custom-" + Date.now(),
+      sender: "agent" as const,
+      senderName: "JD",
+      text: typedMessage.trim(),
+      time: timeStr
+    };
+    setChatMessages(prev => [...prev, newMsg]);
+    setTypedMessage("");
+    setTimeout(() => {
+      const container = document.getElementById("chat-container");
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }, 50);
+  };
+
+  const handleConfirmShowing = (msgId: string) => {
+    setChatMessages(prev => prev.map(msg => {
+      if (msg.id === msgId && msg.interactiveCard) {
+        return {
+          ...msg,
+          interactiveCard: {
+            ...msg.interactiveCard,
+            confirmed: true
+          }
+        };
+      }
+      return msg;
+    }));
+    confetti({
+      particleCount: 80,
+      spread: 50,
+      colors: ["#10b981"]
+    });
+  };
 
   // CRM State
   const [myListings, setMyListings] = useState<Property[]>([]);
@@ -711,460 +913,863 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#090d16] flex flex-col font-sans transition-colors duration-300">
-      <Header />
-
-      <main className="flex-1 max-w-7xl mx-auto px-6 py-24 w-full">
-        {!isLoggedIn ? (
-          /* Locked State - Banner */
-          <div className="max-w-xl mx-auto my-12 p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl text-center space-y-6">
-            <div className="w-16 h-16 rounded-3xl bg-blue-600/10 text-blue-500 flex items-center justify-center mx-auto shadow-md">
-              <Landmark className="h-8 w-8" />
-            </div>
-            <div className="space-y-2">
-              <span className="px-3 py-1 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-500 text-[10px] font-black uppercase tracking-widest">
-                Partner Portal
-              </span>
-              <h1 className="text-2xl font-black text-slate-900 dark:text-white">Homespire Agent Center</h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
-                Log in to your verified agent credentials to manage properties, inspect client leads, and track marketplace statistics.
-              </p>
-            </div>
-            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
-              <button
-                onClick={handleDemoLogin}
-                className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
-              >
-                <Sparkles className="h-4 w-4" /> Demo Access as Rajesh Mehta
-              </button>
-            </div>
-          </div>
-        ) : (
-          /* Professional Active Dashboard */
-          <div className="space-y-8">
-            
-            {/* Agent Greeting Header Card */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-205 dark:border-slate-850 shadow-sm">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white font-black text-lg flex items-center justify-center shadow-md select-none">
-                  {agentName.charAt(0)}
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-black text-slate-900 dark:text-white">Welcome back, {agentName}</h1>
-                    <span className="px-2 py-0.5 rounded-full bg-blue-600/10 text-blue-500 text-[9px] font-black uppercase tracking-widest">
-                      Spire Agent
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-light mt-0.5">{agentEmail}</p>
-                </div>
+    <div className="min-h-screen bg-[#0b1326] text-[#dae2fd] font-sans flex flex-col transition-colors duration-300">
+      {!isLoggedIn ? (
+        <>
+          <Header />
+          <main className="flex-1 max-w-7xl mx-auto px-6 py-24 w-full flex items-center justify-center">
+            {/* Locked State - Banner */}
+            <div className="max-w-xl mx-auto my-12 p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl text-center space-y-6">
+              <div className="w-16 h-16 rounded-3xl bg-blue-600/10 text-blue-500 flex items-center justify-center mx-auto shadow-md">
+                <Landmark className="h-8 w-8" />
               </div>
-
-              <div className="flex items-center gap-3">
+              <div className="space-y-2">
+                <span className="px-3 py-1 rounded-full bg-blue-600/10 border border-blue-500/20 text-blue-500 text-[10px] font-black uppercase tracking-widest">
+                  Partner Portal
+                </span>
+                <h1 className="text-2xl font-black text-slate-900 dark:text-white">Homespire Agent Center</h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
+                  Log in to your verified agent credentials to manage properties, inspect client leads, and track marketplace statistics.
+                </p>
+              </div>
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
                 <button
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-750 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/10 flex items-center gap-2 cursor-pointer border-none"
+                  onClick={handleDemoLogin}
+                  className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 cursor-pointer border-none"
                 >
-                  <Plus className="h-4 w-4" /> Create New Listing
+                  <Sparkles className="h-4 w-4" /> Demo Access as Rajesh Mehta
                 </button>
+              </div>
+            </div>
+          </main>
+          <Footer />
+        </>
+      ) : (
+        /* Agent Central portal layout when logged in */
+        <div className="bg-surface font-body-md text-on-surface flex flex-col flex-1">
+          {/* Header */}
+          <header className="fixed top-0 w-full h-16 z-50 bg-deep-navy/90 backdrop-blur-md border-b border-outline-variant/10">
+            <div className="h-16 px-gutter flex items-center justify-between">
+              <div className="flex items-center gap-4 pl-6">
+                <span className="material-symbols-outlined text-accent-gold">dashboard_customize</span>
+                <span className="font-headline-md text-data-white tracking-tight">Agent Central</span>
+              </div>
+              <div className="flex items-center gap-6 pr-6">
+                <div className="flex items-center gap-2 px-3 py-1 bg-surface-container rounded-full border border-outline-variant/20">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                  <span className="font-label-caps text-[10px] text-on-surface-variant uppercase">Market Active</span>
+                </div>
+                <button className="material-symbols-outlined text-on-surface-variant hover:text-vibrant-blue transition-colors bg-transparent border-none cursor-pointer">notifications</button>
+                <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-data-white font-label-caps text-xs">
+                  {agentName ? agentName.split(" ").map(n => n[0]).join("") : "JD"}
+                </div>
                 <button
                   onClick={handleSignOut}
-                  className="p-2.5 rounded-xl border border-slate-205 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-950 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white transition-colors cursor-pointer bg-transparent"
-                  title="Sign Out"
+                  className="font-label-caps text-xs text-on-surface-variant hover:text-red-500 transition-colors bg-transparent border-none cursor-pointer ml-2"
                 >
-                  <LogOut className="h-4 w-4" />
+                  Sign Out
                 </button>
               </div>
             </div>
+          </header>
 
-            {/* Metric widgets row */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-850 shadow-sm flex items-center gap-4">
-                <div className="p-3 bg-blue-600/10 text-blue-500 rounded-xl"><Building className="h-5 w-5" /></div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Listings</p>
-                  <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{myListings.length}</p>
-                </div>
+          {/* Sidebar */}
+          <aside className="fixed left-0 top-16 w-64 h-[calc(100vh-64px)] bg-surface-container-low border-r border-outline-variant/10 py-8">
+            <nav className="flex flex-col gap-1">
+              <button
+                onClick={() => setActiveTab("dashboard")}
+                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                  activeTab === "dashboard"
+                    ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => setActiveTab("crm-leads")}
+                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                  activeTab === "crm-leads"
+                    ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                CRM Leads
+              </button>
+              <button
+                onClick={() => setActiveTab("messages")}
+                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                  activeTab === "messages"
+                    ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                Messages
+              </button>
+              <button
+                onClick={() => setActiveTab("my-listings")}
+                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                  activeTab === "my-listings"
+                    ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                My Listings
+              </button>
+              <button
+                onClick={() => setActiveTab("analytics")}
+                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                  activeTab === "analytics"
+                    ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                Analytics
+              </button>
+              <button
+                onClick={() => setActiveTab("calendar")}
+                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                  activeTab === "calendar"
+                    ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                Calendar &amp; Tasks
+              </button>
+
+              <div className="mt-8 px-6 mb-2">
+                <p className="font-label-caps text-[10px] text-outline uppercase tracking-[0.2em] text-left">Resources</p>
               </div>
-              
-              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-850 shadow-sm flex items-center gap-4">
-                <div className="p-3 bg-indigo-650/10 text-indigo-500 rounded-xl"><Users className="h-5 w-5" /></div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Leads</p>
-                  <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-                    {inquiries.length} {pendingLeadsCount > 0 && <span className="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded-full ml-1.5">+{pendingLeadsCount} New</span>}
-                  </p>
-                </div>
-              </div>
+              <button
+                onClick={() => setActiveTab("marketing-kit")}
+                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                  activeTab === "marketing-kit"
+                    ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                Marketing Kit
+              </button>
+              <button
+                onClick={() => setActiveTab("settings")}
+                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                  activeTab === "settings"
+                    ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
+                    : "text-on-surface-variant hover:bg-surface-container-high"
+                }`}
+              >
+                Settings
+              </button>
+            </nav>
+          </aside>
 
-              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-850 shadow-sm flex items-center gap-4">
-                <div className="p-3 bg-emerald-650/10 text-emerald-500 rounded-xl"><Landmark className="h-5 w-5" /></div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Est. Commission</p>
-                  <p className="text-xl font-black text-emerald-600 dark:text-emerald-450 mt-1 truncate max-w-[150px]" title={formatCurrency(potentialCommission)}>
-                    {formatCurrency(potentialCommission)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-850 shadow-sm flex items-center gap-4">
-                <div className="p-3 bg-violet-650/10 text-violet-500 rounded-xl"><BarChart3 className="h-5 w-5" /></div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Pipeline</p>
-                  <p className="text-xl font-black text-slate-900 dark:text-white mt-1 truncate" title={formatCurrency(activePipelineValueSum)}>
-                    {formatCurrency(activePipelineValueSum)}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Tab selector */}
-            <div className="space-y-6">
-              
-              <div className="flex border-b border-slate-200 dark:border-slate-800 gap-6 overflow-x-auto whitespace-nowrap pb-1">
-                <button
-                  onClick={() => setActiveTab("overview")}
-                  className={`pb-3 text-xs font-extrabold uppercase tracking-widest transition-all relative cursor-pointer border-none bg-transparent ${
-                    activeTab === "overview" 
-                      ? "text-blue-600" 
-                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                  }`}
+          {/* Main Area */}
+          
+          {/* Main Area */}
+          <main className="pl-64 pt-16 min-h-[calc(100vh-64px)] flex-1 bg-surface relative flex flex-col">
+            <AnimatePresence mode="wait">
+              {activeTab === "messages" && (
+                /* MESSAGES SUB-VIEW */
+                <motion.div
+                  key="messages-tab"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex flex-col w-full h-[calc(100vh-64px)] font-body-md overflow-hidden bg-surface text-on-surface"
                 >
-                  {activeTab === "overview" && (
-                    <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-                  )}
-                  Overview & Pipeline
-                </button>
-                <button
-                  onClick={() => setActiveTab("listings")}
-                  className={`pb-3 text-xs font-extrabold uppercase tracking-widest transition-all relative cursor-pointer border-none bg-transparent ${
-                    activeTab === "listings" 
-                      ? "text-blue-600" 
-                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                  }`}
-                >
-                  {activeTab === "listings" && (
-                    <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-                  )}
-                  My Listings ({myListings.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("leads")}
-                  className={`pb-3 text-xs font-extrabold uppercase tracking-widest transition-all relative cursor-pointer border-none bg-transparent ${
-                    activeTab === "leads" 
-                      ? "text-blue-600" 
-                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                  }`}
-                >
-                  {activeTab === "leads" && (
-                    <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-                  )}
-                  CRM Leads Inbox ({inquiries.length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("calendar")}
-                  className={`pb-3 text-xs font-extrabold uppercase tracking-widest transition-all relative cursor-pointer border-none bg-transparent ${
-                    activeTab === "calendar" 
-                      ? "text-blue-600" 
-                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                  }`}
-                >
-                  {activeTab === "calendar" && (
-                    <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-                  )}
-                  Calendar & Tasks ({appointments.length + tasks.filter(t => !t.completed).length})
-                </button>
-                <button
-                  onClick={() => setActiveTab("commission")}
-                  className={`pb-3 text-xs font-extrabold uppercase tracking-widest transition-all relative cursor-pointer border-none bg-transparent ${
-                    activeTab === "commission" 
-                      ? "text-blue-600" 
-                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                  }`}
-                >
-                  {activeTab === "commission" && (
-                    <motion.div layoutId="tab-underline" className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600" />
-                  )}
-                  Commissions Ledger
-                </button>
-              </div>
-
-              {/* Sub-view switcher */}
-              <div className="min-h-[400px]">
-                <AnimatePresence mode="wait">
-                  
-                  {/* TAB 1: OVERVIEW & PIPELINE */}
-                  {activeTab === "overview" && (
-                    <motion.div
-                      key="overview-tab"
-                      initial={{ opacity: 0, y: 15 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -15 }}
-                      transition={{ duration: 0.2 }}
-                      className="space-y-6"
-                    >
-                      {/* Active Transactions Deal Pipeline */}
-                      <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850 p-6 rounded-3xl shadow-sm space-y-6 text-left">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h3 className="font-extrabold text-sm text-slate-950 dark:text-white flex items-center gap-2">
-                              <Activity className="h-4.5 w-4.5 text-blue-500" /> Transaction Pipeline Tracker
-                            </h3>
-                            <p className="text-[10px] text-slate-400 font-light mt-0.5">Stage progression of active deals in Rajesh Mehta&apos;s portfolio</p>
-                          </div>
-                        </div>
-
-                        {/* Interactive Pipeline Lanes */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                          
-                          {/* Lane 1: Active Listing */}
-                          <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 space-y-3">
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-slate-800">
-                              <span className="text-[10px] font-black uppercase text-blue-550 dark:text-blue-450 tracking-wider">Active Listing</span>
-                              <span className="text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-900 px-2 py-0.5 rounded-full">{pipelineCounts.listing}</span>
-                            </div>
-                            <div className="space-y-2.5">
-                              {myListings.filter(p => (dealStages[p.id] || "listing") === "listing").map(listing => (
-                                <div key={listing.id} className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/80 shadow-xs text-xs space-y-2">
-                                  <h4 className="font-extrabold text-slate-850 dark:text-slate-100 line-clamp-1">{listing.title}</h4>
-                                  <p className="font-black text-blue-600 dark:text-blue-450">{formatCurrency(listing.price)}</p>
-                                  <div className="flex justify-end gap-1 pt-1.5 border-t border-slate-100 dark:border-slate-850">
-                                    <button 
-                                      onClick={() => updatePropertyStage(listing.id, "offer")}
-                                      className="px-2 py-1 bg-blue-600/10 text-blue-500 rounded text-[9px] font-bold hover:bg-blue-600/20 cursor-pointer border-none"
-                                    >
-                                      Move to Offer ➔
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                              {pipelineCounts.listing === 0 && (
-                                <p className="text-[10px] text-slate-400 dark:text-slate-650 text-center py-4 font-bold">No deals in listing.</p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Lane 2: Under Offer */}
-                          <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 space-y-3">
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-slate-800">
-                              <span className="text-[10px] font-black uppercase text-amber-500 tracking-wider">Under Offer</span>
-                              <span className="text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-900 px-2 py-0.5 rounded-full">{pipelineCounts.offer}</span>
-                            </div>
-                            <div className="space-y-2.5">
-                              {myListings.filter(p => dealStages[p.id] === "offer").map(listing => (
-                                <div key={listing.id} className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/80 shadow-xs text-xs space-y-2">
-                                  <h4 className="font-extrabold text-slate-850 dark:text-slate-100 line-clamp-1">{listing.title}</h4>
-                                  <p className="font-black text-amber-500">{formatCurrency(listing.price)}</p>
-                                  <div className="flex justify-between gap-1 pt-1.5 border-t border-slate-100 dark:border-slate-850">
-                                    <button 
-                                      onClick={() => updatePropertyStage(listing.id, "listing")}
-                                      className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-450 rounded text-[9px] font-bold cursor-pointer border-none"
-                                    >
-                                      🠔 Back
-                                    </button>
-                                    <button 
-                                      onClick={() => updatePropertyStage(listing.id, "escrow")}
-                                      className="px-2 py-1 bg-amber-500/10 text-amber-550 rounded text-[9px] font-bold hover:bg-amber-550/20 cursor-pointer border-none"
-                                    >
-                                      To Escrow ➔
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                              {pipelineCounts.offer === 0 && (
-                                <p className="text-[10px] text-slate-400 dark:text-slate-650 text-center py-4 font-bold">No active offers.</p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Lane 3: In Escrow */}
-                          <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 space-y-3">
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-slate-800">
-                              <span className="text-[10px] font-black uppercase text-indigo-500 tracking-wider">In Escrow</span>
-                              <span className="text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-900 px-2 py-0.5 rounded-full">{pipelineCounts.escrow}</span>
-                            </div>
-                            <div className="space-y-2.5">
-                              {myListings.filter(p => dealStages[p.id] === "escrow").map(listing => (
-                                <div key={listing.id} className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/80 shadow-xs text-xs space-y-2">
-                                  <h4 className="font-extrabold text-slate-850 dark:text-slate-100 line-clamp-1">{listing.title}</h4>
-                                  <p className="font-black text-indigo-550">{formatCurrency(listing.price)}</p>
-                                  <div className="flex justify-between gap-1 pt-1.5 border-t border-slate-100 dark:border-slate-850">
-                                    <button 
-                                      onClick={() => updatePropertyStage(listing.id, "offer")}
-                                      className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-450 rounded text-[9px] font-bold cursor-pointer border-none"
-                                    >
-                                      🠔 Back
-                                    </button>
-                                    <button 
-                                      onClick={() => updatePropertyStage(listing.id, "closed")}
-                                      className="px-2 py-1 bg-indigo-500/10 text-indigo-500 rounded text-[9px] font-bold hover:bg-indigo-550/20 cursor-pointer border-none"
-                                    >
-                                      Close Deal ✓
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                              {pipelineCounts.escrow === 0 && (
-                                <p className="text-[10px] text-slate-400 dark:text-slate-650 text-center py-4 font-bold">No deals in escrow.</p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Lane 4: Closed / Sold */}
-                          <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 space-y-3">
-                            <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-slate-800">
-                              <span className="text-[10px] font-black uppercase text-emerald-500 tracking-wider">Closed / Sold</span>
-                              <span className="text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-900 px-2 py-0.5 rounded-full">{pipelineCounts.closed}</span>
-                            </div>
-                            <div className="space-y-2.5">
-                              {myListings.filter(p => dealStages[p.id] === "closed").map(listing => (
-                                <div key={listing.id} className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/80 shadow-xs text-xs space-y-2 relative overflow-hidden">
-                                  <div className="absolute top-0 right-0 p-1 bg-emerald-500 text-white rounded-bl">
-                                    <Check className="h-3 w-3 stroke-[3]" />
-                                  </div>
-                                  <h4 className="font-extrabold text-slate-850 dark:text-slate-100 line-clamp-1 pr-4">{listing.title}</h4>
-                                  <p className="font-black text-emerald-600 dark:text-emerald-450">{formatCurrency(listing.price)}</p>
-                                  <div className="flex justify-start gap-1 pt-1.5 border-t border-slate-100 dark:border-slate-850">
-                                    <button 
-                                      onClick={() => updatePropertyStage(listing.id, "escrow")}
-                                      className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-450 rounded text-[9px] font-bold cursor-pointer border-none"
-                                    >
-                                      Re-open Escrow
-                                    </button>
-                                  </div>
-                                </div>
-                              ))}
-                              {pipelineCounts.closed === 0 && (
-                                <p className="text-[10px] text-slate-400 dark:text-slate-650 text-center py-4 font-bold">No closed deals.</p>
-                              )}
-                            </div>
-                          </div>
-
+                  <div className="flex flex-1 overflow-hidden h-full">
+                    {/* Left Sidebar: Conversation List */}
+                    <div className="w-1/3 min-w-[320px] max-w-[400px] bg-surface-container flex flex-col shadow-[4px_0_24px_-4px_rgba(2,6,23,0.4)] z-10">
+                      {/* List Header */}
+                      <div className="p-6 pb-4 text-left">
+                        <h1 className="font-headline-md text-headline-md text-data-white mb-6">Messages</h1>
+                        <div className="relative group">
+                          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline group-focus-within:text-vibrant-blue transition-colors">search</span>
+                          <input 
+                            className="w-full bg-surface py-3 pl-12 pr-4 rounded-full text-data-white font-body-md text-body-md border border-slate-surface focus:outline-none focus:border-vibrant-blue focus:shadow-[0_0_12px_rgba(37,99,235,0.2)] transition-all placeholder:text-outline" 
+                            placeholder="Search buyers, properties..." 
+                            type="text"
+                            value={chatSearchQuery}
+                            onChange={(e) => setChatSearchQuery(e.target.value)}
+                          />
                         </div>
                       </div>
-
-                      {/* Secondary row: Schedule & Tasks Checklist */}
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-left">
-                        
-                        {/* Upcoming Schedule Widget */}
-                        <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850 p-6 rounded-3xl shadow-sm space-y-4">
-                          <div className="flex justify-between items-center">
-                            <h3 className="font-extrabold text-sm text-slate-950 dark:text-white flex items-center gap-2">
-                              <Calendar className="h-4.5 w-4.5 text-blue-500" /> Agenda & Showings
-                            </h3>
+                      {/* Segmented Control */}
+                      <div className="px-6 mb-4 flex gap-2">
+                        <button 
+                          onClick={() => setChatSegment("all")}
+                          className={`flex-1 py-1.5 px-3 font-label-caps text-label-caps rounded-full text-center transition-colors border ${
+                            chatSegment === "all" ? "bg-vibrant-blue text-data-white border-vibrant-blue" : "bg-surface hover:bg-surface-container-high text-on-surface-variant border-slate-surface"
+                          }`}
+                        >
+                          All
+                        </button>
+                        <button 
+                          onClick={() => setChatSegment("unread")}
+                          className={`flex-1 py-1.5 px-3 font-label-caps text-label-caps rounded-full text-center transition-colors border ${
+                            chatSegment === "unread" ? "bg-vibrant-blue text-data-white border-vibrant-blue" : "bg-surface hover:bg-surface-container-high text-on-surface-variant border-slate-surface"
+                          }`}
+                        >
+                          Unread <span className="bg-vibrant-blue text-data-white text-[10px] px-1.5 py-0.5 rounded-full ml-1">2</span>
+                        </button>
+                        <button 
+                          onClick={() => setChatSegment("starred")}
+                          className={`flex-1 py-1.5 px-3 font-label-caps text-label-caps rounded-full text-center transition-colors border ${
+                            chatSegment === "starred" ? "bg-vibrant-blue text-data-white border-vibrant-blue" : "bg-surface hover:bg-surface-container-high text-on-surface-variant border-slate-surface"
+                          }`}
+                        >
+                          Starred
+                        </button>
+                      </div>
+                      {/* Conversation List Scrollable Area */}
+                      <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
+                        {conversationsList
+                          .filter(c => {
+                            if (chatSearchQuery.trim()) {
+                              const q = chatSearchQuery.toLowerCase();
+                              return c.name.toLowerCase().includes(q) || c.property.toLowerCase().includes(q);
+                            }
+                            return true;
+                          })
+                          .filter(c => {
+                            if (chatSegment === "unread") return c.unread;
+                            if (chatSegment === "starred") return c.starred;
+                            return true;
+                          })
+                          .map((c) => (
                             <button
-                              onClick={() => {
-                                setApptClient(inquiries[0]?.name || "");
-                                setApptPropertyId(myListings[0]?.id || "");
-                                setIsAppointmentModalOpen(true);
-                              }}
-                              className="text-[10px] font-bold text-blue-500 bg-blue-500/10 px-2.5 py-1.5 rounded-lg hover:bg-blue-600/20 transition-colors border-none cursor-pointer"
+                              key={c.id}
+                              onClick={() => setSelectedConversationId(c.id)}
+                              className={`w-full text-left p-4 rounded-xl flex flex-col gap-2 relative transition-transform hover:scale-[1.01] border-none bg-transparent cursor-pointer ${
+                                selectedConversationId === c.id ? "bg-surface-container-high" : "hover:bg-surface-container-highest"
+                              }`}
                             >
-                              + New Event
-                            </button>
-                          </div>
-
-                          <div className="space-y-3.5 pt-2">
-                            {appointments.map((appt) => (
-                              <div key={appt.id} className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-100 dark:border-slate-850 flex justify-between items-start gap-4 text-xs">
-                                <div className="space-y-1.5">
-                                  <div className="flex items-center gap-2">
-                                    <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-blue-600/10 text-blue-500">
-                                      {appt.type}
-                                    </span>
-                                    <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
-                                      <Clock className="h-3.5 w-3.5" /> {formatRelativeDate(appt.dateTime)}
-                                    </span>
+                              {selectedConversationId === c.id && (
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-vibrant-blue rounded-r-full"></div>
+                              )}
+                              <div className="flex justify-between items-start pl-2">
+                                <div className="flex items-center gap-3">
+                                  <div className="relative">
+                                    {c.avatar.startsWith("http") ? (
+                                      <img className="w-10 h-10 rounded-full object-cover" src={c.avatar} alt={c.name} />
+                                    ) : (
+                                      <div className="w-10 h-10 rounded-full bg-slate-surface flex items-center justify-center text-data-white font-headline-md text-sm">
+                                        {c.avatar}
+                                      </div>
+                                    )}
+                                    {c.online && (
+                                      <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-surface-container-high"></div>
+                                    )}
                                   </div>
-                                  <p className="font-bold text-slate-900 dark:text-white">
-                                    Client: {appt.clientName}
-                                  </p>
-                                  <p className="text-slate-450 dark:text-slate-400 text-[10px] line-clamp-1" title={appt.propertyTitle}>
-                                    Listing: {appt.propertyTitle}
-                                  </p>
-                                  {appt.notes && (
-                                    <p className="text-[10px] text-slate-500 dark:text-slate-450 italic">&ldquo;{appt.notes}&rdquo;</p>
-                                  )}
+                                  <div>
+                                    <h3 className="font-body-md font-semibold text-data-white">{c.name}</h3>
+                                    <p className={`font-data-mono text-data-mono text-[11px] ${c.pincodeColor}`}>{c.property}</p>
+                                  </div>
                                 </div>
-                                <button
-                                  onClick={() => handleDeleteAppointment(appt.id)}
-                                  className="p-1 text-slate-400 hover:text-red-500 cursor-pointer bg-transparent border-none"
-                                >
-                                  ✕
-                                </button>
+                                <span className={`font-label-caps text-[10px] ${c.unread ? "text-vibrant-blue" : "text-outline"}`}>{c.time}</span>
                               </div>
-                            ))}
-                            {appointments.length === 0 && (
-                              <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-12 font-bold">
-                                No scheduled showings or appointments.
-                              </p>
-                            )}
+                              <div className="pl-2 flex justify-between items-end gap-4 mt-1">
+                                <p className="font-body-md text-sm text-data-white truncate">{c.lastMsg}</p>
+                                {c.unread && (
+                                  <div className="w-2 h-2 rounded-full bg-vibrant-blue flex-shrink-0 animate-pulse"></div>
+                                )}
+                              </div>
+                            </button>
+                          ))
+                        }
+                      </div>
+                    </div>
+                    {/* Right Panel: Active Thread */}
+                    <div className="flex-1 flex flex-col bg-surface relative">
+                      {/* Thread Header */}
+                      <div className="h-20 border-b border-slate-surface flex items-center justify-between px-8 bg-surface/90 backdrop-blur-md z-20">
+                        <div className="flex items-center gap-4 text-left">
+                          {selectedConversationId === "anjali" ? (
+                            <>
+                              <img className="w-12 h-12 rounded-full object-cover ring-2 ring-vibrant-blue/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwqc_MyOlNPcIky46j5IagA5MKKy9MIgc9CoPyYyN8mvwrOUEhCAVAmJuSwxPqkl2pJHaTJ-IGmLggOChJZQfLILifUIi52ap6GXHEN_jzgqZSFAJ_3QErbVBSsutH0oFjfUKaislFnChVyVkQGRl262dSI5gBYhFhSQBm_-aong-XF1cmWf3QatrLEm8w5rVbmZK_ZIMuoX_plpLUyXkmm4aXt2aqempr-2_AgiTfILLjJlLGjjQ" alt="Anjali Sharma" />
+                              <div>
+                                <h2 className="font-headline-md text-xl text-data-white">Anjali Sharma</h2>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                  <span className="font-label-caps text-xs text-on-surface-variant">Online</span>
+                                </div>
+                              </div>
+                            </>
+                          ) : selectedConversationId === "julian" ? (
+                            <>
+                              <div className="w-12 h-12 rounded-full bg-slate-surface flex items-center justify-center text-data-white font-headline-md text-sm ring-2 ring-vibrant-blue/20">JB</div>
+                              <div>
+                                <h2 className="font-headline-md text-xl text-data-white">Julian Blackwood</h2>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                                  <span className="font-label-caps text-xs text-on-surface-variant">Offline</span>
+                                </div>
+                              </div>
+                            </>
+                          ) : selectedConversationId === "marcus" ? (
+                            <>
+                              <img className="w-12 h-12 rounded-full object-cover ring-2 ring-vibrant-blue/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6pG44Wa0Nhtvr_JMTlUt7HF_OAeqNoNIrKFmyCOaeg-0v33o52qKIy6dabvu71viUHixo2-m2mN0iNx1WM0lZRhIJUgbgekbSfqDtDjCtTLsSvjF0YlVtvtipoWmQw6SPK0qrc60-7JzS4F4ZptelO8bg1dd0zLl9o5lG6PCGS2ppR11fcW0EzQji6LF96OqCwhx0srbjIJAQZ5Igf1qjv1RSf7UrPpp3vWRfZgEo5cOSVyK7LGs" alt="Marcus Chen" />
+                              <div>
+                                <h2 className="font-headline-md text-xl text-data-white">Marcus Chen</h2>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                                  <span className="font-label-caps text-xs text-on-surface-variant">Offline</span>
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="w-12 h-12 rounded-full bg-slate-surface flex items-center justify-center text-data-white font-headline-md text-sm ring-2 ring-vibrant-blue/20">ER</div>
+                              <div>
+                                <h2 className="font-headline-md text-xl text-data-white">Elena Rostova</h2>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                                  <span className="font-label-caps text-xs text-on-surface-variant">Offline</span>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-6">
+                          {/* Context Card */}
+                          <div className="flex items-center gap-3 bg-surface-container py-2 px-4 rounded-xl border border-slate-surface">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-surface">
+                              <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5XHFwZwUT6DWQaay4YqVrKrrOWVZIwOIwcTSdZdP_vWiHwuk52M9LFFC0sYMkfE_KVR3_wdokHYWaWzy_cGvcmj21_zKuN5j2uWnxTjYpA6cakU-7_Er7RfmoCCwXkncXAFKMK2bmzAUOGg_GFLZ07-_Q2EckeIilFJImxef2GvrR0T0091mEd8ePMAZff0F4_vlpOsFTz9c2_L-HkFwWCZLj8Cre-UX2e0ddGQcat4inXmUg8ws" alt="Listing Context" />
+                            </div>
+                            <div className="flex flex-col text-left font-sans">
+                              <span className="font-body-md font-semibold text-sm text-data-white">Seaside Luxury Penthouse</span>
+                              <span className="font-data-mono text-xs text-outline">₹6,50,00,000</span>
+                            </div>
+                            <Link className="ml-4 p-2 text-vibrant-blue hover:bg-vibrant-blue/10 rounded-full transition-colors flex items-center justify-center" href="/properties/prop-1">
+                              <span className="material-symbols-outlined text-[20px]">open_in_new</span>
+                            </Link>
                           </div>
+                          <div className="h-8 w-px bg-slate-surface"></div>
+                          <button className="text-outline hover:text-data-white transition-colors bg-transparent border-none cursor-pointer">
+                            <span className="material-symbols-outlined">more_vert</span>
+                          </button>
+                        </div>
+                      </div>
+                      {/* Messages Area */}
+                      <div className="flex-1 overflow-y-auto p-8 space-y-6 flex flex-col" id="chat-container">
+                        {/* Date Divider */}
+                        <div className="flex items-center justify-center gap-4 my-4">
+                          <div className="h-px bg-slate-surface flex-1"></div>
+                          <span className="font-label-caps text-xs text-outline px-4 py-1 bg-surface-container rounded-full border border-slate-surface">Today</span>
+                          <div className="h-px bg-slate-surface flex-1"></div>
                         </div>
 
-                        {/* Recent Tasks Widget */}
-                        <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850 p-6 rounded-3xl shadow-sm space-y-4">
+                        {getSelectedConversationMessages().map((msg) => {
+                          if (msg.sender === "system") {
+                            return (
+                              <div key={msg.id} className="flex justify-center">
+                                <div className="bg-surface-container-high/50 px-4 py-2 rounded-xl border border-slate-surface/50 text-center max-w-md">
+                                  <span className="material-symbols-outlined text-vibrant-blue text-[16px] inline-block align-middle mr-1">info</span>
+                                  <span className="font-body-md text-xs text-on-surface-variant">{msg.text}</span>
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          if (msg.sender === "buyer") {
+                            return (
+                              <div key={msg.id} className="flex gap-4 max-w-[80%] items-start text-left">
+                                {msg.avatar ? (
+                                  <img className="w-8 h-8 rounded-full object-cover flex-shrink-0 mt-1" src={msg.avatar} alt={msg.senderName} />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full bg-slate-surface flex items-center justify-center text-white text-xs mt-1">{msg.senderName.split(" ").map(n => n[0]).join("")}</div>
+                                )}
+                                <div className="flex flex-col gap-1 items-start">
+                                  <div className="bg-surface-container text-data-white p-4 rounded-2xl rounded-tl-sm border border-slate-surface shadow-sm font-body-md text-body-md">
+                                    <p>{msg.text}</p>
+                                  </div>
+                                  <span className="font-label-caps text-[10px] text-outline ml-1">{msg.time}</span>
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          // Agent Sender
+                          return (
+                            <div key={msg.id} className="flex gap-4 max-w-[80%] self-end items-start justify-end text-right w-full">
+                              <div className="flex flex-col gap-1 items-end w-full">
+                                {msg.interactiveCard ? (
+                                  <div className="bg-surface-container border border-slate-surface rounded-2xl rounded-tr-sm overflow-hidden w-full max-w-sm shadow-lg text-left">
+                                    <div className="h-24 bg-surface-container relative">
+                                      <div className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-screen" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuBYp1Cds--dpdK1X9fOKgRf32WvXk0jxUK9Pc9zaYsdQD_rQcY-sseMyZrGzX0c8GGQpeiO27IZ_Skp3kOV2NrzHiBoLxa2Tib3uxtZ-GzjVOEJQ9KkC0B2vGKw9ecQeYVs8KGsSN2ajjl7MCNjvCkcRrpAVj7IRRypkTh_LfQs9Kvf5RxACyeerX-QLHolsP4cqZhbCg_Y4NShAG85E6W7QLAtOOktaJMTx4fpXNPs1pHf_WiW_K8')" }}></div>
+                                      <div className="absolute inset-0 bg-gradient-to-t from-surface-container to-transparent"></div>
+                                      <div className="absolute bottom-3 left-4 flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-vibrant-blue bg-surface-container p-1.5 rounded-full border border-slate-surface shadow-sm">event</span>
+                                        <span className="font-body-md font-semibold text-data-white text-sm">Showing Proposed</span>
+                                      </div>
+                                    </div>
+                                    <div className="p-4 bg-surface-container text-left">
+                                      <div className="flex justify-between items-center mb-3">
+                                        <span className="font-data-mono text-xs text-outline">{msg.interactiveCard.date}</span>
+                                        <span className="font-data-mono text-xs text-data-white bg-slate-surface px-2 py-0.5 rounded text-center min-w-[70px]">{msg.interactiveCard.time}</span>
+                                      </div>
+                                      <button 
+                                        onClick={() => handleConfirmShowing(msg.id)}
+                                        disabled={msg.interactiveCard.confirmed}
+                                        className={`w-full py-2 font-label-caps text-xs rounded-lg transition-colors border flex justify-center items-center gap-2 group cursor-pointer ${
+                                          msg.interactiveCard.confirmed 
+                                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 cursor-default animate-none" 
+                                            : "bg-slate-surface hover:bg-vibrant-blue hover:text-data-white text-on-surface-variant border-outline-variant/30"
+                                        }`}
+                                      >
+                                        <span className="material-symbols-outlined text-[16px] group-hover:scale-110 transition-transform">
+                                          {msg.interactiveCard.confirmed ? "done" : "schedule"}
+                                        </span> 
+                                        {msg.interactiveCard.confirmed ? "Showing Confirmed" : "Wait for confirmation"}
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <div className="bg-vibrant-blue text-data-white p-4 rounded-2xl rounded-tr-sm shadow-md font-body-md text-body-md text-left">
+                                      <p>{msg.text}</p>
+                                    </div>
+                                    <div className="flex items-center gap-1 mt-1 mr-1">
+                                      <span className="font-label-caps text-[10px] text-outline">{msg.time}</span>
+                                      <span className="material-symbols-outlined text-[14px] text-vibrant-blue" style={{ fontVariationSettings: "'FILL' 1" }}>done_all</span>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                              <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-data-white font-label-caps flex-shrink-0 mt-1 text-xs select-none">JD</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {/* Input Area */}
+                      <div className="p-6 bg-surface border-t border-slate-surface z-20">
+                        <div className="bg-surface-container rounded-2xl border border-slate-surface flex flex-col transition-all focus-within:border-vibrant-blue focus-within:shadow-[0_0_15px_rgba(37,99,235,0.15)]">
+                          <textarea 
+                            className="w-full bg-transparent p-4 font-body-md text-data-white placeholder:text-outline resize-none focus:outline-none" 
+                            id="message-input" 
+                            placeholder="Type your message..." 
+                            rows={2}
+                            value={typedMessage}
+                            onChange={(e) => setTypedMessage(e.target.value)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSendChatMessage();
+                              }
+                            }}
+                          />
+                          <div className="px-4 py-3 border-t border-slate-surface/50 flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              <button className="p-2 text-outline hover:text-vibrant-blue hover:bg-vibrant-blue/10 rounded-full transition-colors tooltip-trigger bg-transparent border-none cursor-pointer" title="Attach File">
+                                <span className="material-symbols-outlined text-[20px]">attach_file</span>
+                              </button>
+                              <button className="p-2 text-outline hover:text-vibrant-blue hover:bg-vibrant-blue/10 rounded-full transition-colors tooltip-trigger bg-transparent border-none cursor-pointer" title="Insert Listing">
+                                <span className="material-symbols-outlined text-[20px]">real_estate_agent</span>
+                              </button>
+                              <button className="p-2 text-outline hover:text-vibrant-blue hover:bg-vibrant-blue/10 rounded-full transition-colors tooltip-trigger bg-transparent border-none cursor-pointer" title="Propose Time">
+                                <span className="material-symbols-outlined text-[20px]">event_available</span>
+                              </button>
+                            </div>
+                            <button 
+                              onClick={handleSendChatMessage}
+                              className="bg-vibrant-blue hover:bg-inverse-primary text-data-white px-6 py-2 rounded-full font-label-caps text-xs flex items-center gap-2 transition-all hover:shadow-[0_0_12px_rgba(37,99,235,0.4)] active:scale-95 border-none cursor-pointer"
+                            >
+                              <span>SEND</span>
+                              <span className="material-symbols-outlined text-[16px]">send</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === "dashboard" && (
+                /* TAB 1: OVERVIEW & PIPELINE */
+                <motion.div
+                  key="dashboard-tab"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-8 space-y-6 text-left"
+                >
+                  {/* Agent Greeting Header Card */}
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-205 dark:border-slate-850 shadow-sm">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-blue-650 text-white font-black text-lg flex items-center justify-center shadow-md select-none">
+                        {agentName ? agentName.charAt(0) : "R"}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h1 className="text-xl font-black text-slate-900 dark:text-white">Welcome back, {agentName}</h1>
+                          <span className="px-2 py-0.5 rounded-full bg-blue-600/10 text-blue-500 text-[9px] font-black uppercase tracking-widest">
+                            Spire Agent
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-light mt-0.5">{agentEmail}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-750 text-white text-xs font-bold transition-all shadow-md shadow-blue-500/10 flex items-center gap-2 cursor-pointer border-none"
+                      >
+                        <Plus className="h-4 w-4" /> Create New Listing
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Metric widgets row */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-850 shadow-sm flex items-center gap-4">
+                      <div className="p-3 bg-blue-600/10 text-blue-500 rounded-xl"><Building className="h-5 w-5" /></div>
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Listings</p>
+                        <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">{myListings.length}</p>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-850 shadow-sm flex items-center gap-4">
+                      <div className="p-3 bg-indigo-650/10 text-indigo-500 rounded-xl"><Users className="h-5 w-5" /></div>
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Client Leads</p>
+                        <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
+                          {inquiries.length} {pendingLeadsCount > 0 && <span className="text-[9px] font-bold text-red-500 bg-red-50 dark:bg-red-950/40 px-2 py-0.5 rounded-full ml-1.5">+{pendingLeadsCount} New</span>}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-850 shadow-sm flex items-center gap-4">
+                      <div className="p-3 bg-emerald-650/10 text-emerald-500 rounded-xl"><Landmark className="h-5 w-5" /></div>
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Est. Commission</p>
+                        <p className="text-xl font-black text-emerald-600 dark:text-emerald-450 mt-1 truncate max-w-[150px]" title={formatCurrency(potentialCommission)}>
+                          {formatCurrency(potentialCommission)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/50 dark:border-slate-850 shadow-sm flex items-center gap-4">
+                      <div className="p-3 bg-violet-650/10 text-violet-500 rounded-xl"><BarChart3 className="h-5 w-5" /></div>
+                      <div>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Active Pipeline</p>
+                        <p className="text-xl font-black text-slate-900 dark:text-white mt-1 truncate" title={formatCurrency(activePipelineValueSum)}>
+                          {formatCurrency(activePipelineValueSum)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6 pt-4">
+                    {/* Active Transactions Deal Pipeline */}
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850 p-6 rounded-3xl shadow-sm space-y-6">
+                      <div className="flex justify-between items-center">
+                        <div>
                           <h3 className="font-extrabold text-sm text-slate-950 dark:text-white flex items-center gap-2">
-                            <CheckSquare className="h-4.5 w-4.5 text-blue-500" /> Action Items / Tasks
+                            <Activity className="h-4.5 w-4.5 text-blue-500" /> Transaction Pipeline Tracker
                           </h3>
+                          <p className="text-[10px] text-slate-400 font-light mt-0.5">Stage progression of active deals in Rajesh Mehta&apos;s portfolio</p>
+                        </div>
+                      </div>
 
-                          {/* Quick Add Task */}
-                          <form onSubmit={handleAddTask} className="flex gap-2">
-                            <input
-                              type="text"
-                              value={taskText}
-                              onChange={(e) => setTaskText(e.target.value)}
-                              placeholder="Add action item (e.g. Schedule floor planner)..."
-                              required
-                              className="bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-850 text-slate-850 dark:text-white placeholder-slate-400 outline-none w-full"
-                            />
-                            <button
-                              type="submit"
-                              className="px-4 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-colors border-none cursor-pointer"
-                            >
-                              Add
-                            </button>
-                          </form>
-
-                          <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
-                            {tasks.map((task) => (
-                              <div key={task.id} className="flex justify-between items-center p-2 hover:bg-slate-50 dark:hover:bg-slate-950 rounded-xl transition-colors text-xs">
-                                <button
-                                  type="button"
-                                  onClick={() => handleToggleTask(task.id)}
-                                  className="flex items-center gap-3 text-left font-semibold text-slate-800 dark:text-slate-250 cursor-pointer bg-transparent border-none outline-none"
-                                >
-                                  {task.completed ? (
-                                    <CheckSquare className="h-4.5 w-4.5 text-emerald-500 flex-shrink-0" />
-                                  ) : (
-                                    <Square className="h-4.5 w-4.5 text-slate-400 dark:text-slate-650 flex-shrink-0" />
-                                  )}
-                                  <span className={task.completed ? "line-through text-slate-400 dark:text-slate-600 font-light" : ""}>
-                                    {task.text}
-                                  </span>
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteTask(task.id)}
-                                  className="p-1 text-slate-400 hover:text-red-500 cursor-pointer bg-transparent border-none"
-                                >
-                                  ✕
-                                </button>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        {/* Lane 1: Active Listing */}
+                        <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 space-y-3">
+                          <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-slate-800">
+                            <span className="text-[10px] font-black uppercase text-blue-550 dark:text-blue-450 tracking-wider">Active Listing</span>
+                            <span className="text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-900 px-2 py-0.5 rounded-full">{pipelineCounts.listing}</span>
+                          </div>
+                          <div className="space-y-2.5">
+                            {myListings.filter(p => (dealStages[p.id] || "listing") === "listing").map(listing => (
+                              <div key={listing.id} className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/80 shadow-xs text-xs space-y-2">
+                                <h4 className="font-extrabold text-slate-850 dark:text-slate-100 line-clamp-1">{listing.title}</h4>
+                                <p className="font-black text-blue-600 dark:text-blue-450">{formatCurrency(listing.price)}</p>
+                                <div className="flex justify-end gap-1 pt-1.5 border-t border-slate-100 dark:border-slate-850">
+                                  <button 
+                                    onClick={() => updatePropertyStage(listing.id, "offer")}
+                                    className="px-2 py-1 bg-blue-600/10 text-blue-500 rounded text-[9px] font-bold hover:bg-blue-600/20 cursor-pointer border-none"
+                                  >
+                                    Move to Offer ➔
+                                  </button>
+                                </div>
                               </div>
                             ))}
-                            {tasks.length === 0 && (
-                              <p className="text-xs text-slate-450 dark:text-slate-600 text-center py-8 font-bold">
-                                No outstanding checklist tasks.
-                              </p>
+                            {pipelineCounts.listing === 0 && (
+                              <p className="text-[10px] text-slate-400 dark:text-slate-650 text-center py-4 font-bold">No deals in listing.</p>
                             )}
                           </div>
                         </div>
 
-                      </div>
-                    </motion.div>
-                  )}
+                        {/* Lane 2: Under Offer */}
+                        <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 space-y-3">
+                          <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-slate-800">
+                            <span className="text-[10px] font-black uppercase text-amber-500 tracking-wider">Under Offer</span>
+                            <span className="text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-900 px-2 py-0.5 rounded-full">{pipelineCounts.offer}</span>
+                          </div>
+                          <div className="space-y-2.5">
+                            {myListings.filter(p => dealStages[p.id] === "offer").map(listing => (
+                              <div key={listing.id} className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/80 shadow-xs text-xs space-y-2">
+                                <h4 className="font-extrabold text-slate-850 dark:text-slate-100 line-clamp-1">{listing.title}</h4>
+                                <p className="font-black text-amber-550">{formatCurrency(listing.price)}</p>
+                                <div className="flex justify-between gap-1 pt-1.5 border-t border-slate-100 dark:border-slate-850">
+                                  <button 
+                                    onClick={() => updatePropertyStage(listing.id, "listing")}
+                                    className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-450 rounded text-[9px] font-bold cursor-pointer border-none"
+                                  >
+                                    🠔 Back
+                                  </button>
+                                  <button 
+                                    onClick={() => updatePropertyStage(listing.id, "escrow")}
+                                    className="px-2 py-1 bg-amber-500/10 text-amber-550 rounded text-[9px] font-bold hover:bg-amber-550/20 cursor-pointer border-none"
+                                  >
+                                    To Escrow ➔
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                            {pipelineCounts.offer === 0 && (
+                              <p className="text-[10px] text-slate-400 dark:text-slate-650 text-center py-4 font-bold">No active offers.</p>
+                            )}
+                          </div>
+                        </div>
 
-                  {/* TAB 2: PROPERTY LISTINGS */}
-                  {activeTab === "listings" && (
+                        {/* Lane 3: In Escrow */}
+                        <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 space-y-3">
+                          <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-slate-800">
+                            <span className="text-[10px] font-black uppercase text-indigo-500 tracking-wider">In Escrow</span>
+                            <span className="text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-900 px-2 py-0.5 rounded-full">{pipelineCounts.escrow}</span>
+                          </div>
+                          <div className="space-y-2.5">
+                            {myListings.filter(p => dealStages[p.id] === "escrow").map(listing => (
+                              <div key={listing.id} className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/80 shadow-xs text-xs space-y-2">
+                                <h4 className="font-extrabold text-slate-850 dark:text-slate-100 line-clamp-1">{listing.title}</h4>
+                                <p className="font-black text-indigo-550">{formatCurrency(listing.price)}</p>
+                                <div className="flex justify-between gap-1 pt-1.5 border-t border-slate-100 dark:border-slate-850">
+                                  <button 
+                                    onClick={() => updatePropertyStage(listing.id, "offer")}
+                                    className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-450 rounded text-[9px] font-bold cursor-pointer border-none"
+                                  >
+                                    🠔 Back
+                                  </button>
+                                  <button 
+                                    onClick={() => updatePropertyStage(listing.id, "closed")}
+                                    className="px-2 py-1 bg-indigo-500/10 text-indigo-500 rounded text-[9px] font-bold hover:bg-indigo-550/20 cursor-pointer border-none"
+                                  >
+                                    Close Deal ✓
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                            {pipelineCounts.escrow === 0 && (
+                              <p className="text-[10px] text-slate-400 dark:text-slate-650 text-center py-4 font-bold">No deals in escrow.</p>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Lane 4: Closed / Sold */}
+                        <div className="bg-slate-50 dark:bg-slate-950/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-850 space-y-3">
+                          <div className="flex justify-between items-center pb-2 border-b border-slate-200/50 dark:border-slate-800">
+                            <span className="text-[10px] font-black uppercase text-emerald-500 tracking-wider">Closed / Sold</span>
+                            <span className="text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-900 px-2 py-0.5 rounded-full">{pipelineCounts.closed}</span>
+                          </div>
+                          <div className="space-y-2.5">
+                            {myListings.filter(p => dealStages[p.id] === "closed").map(listing => (
+                              <div key={listing.id} className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200/40 dark:border-slate-800/80 shadow-xs text-xs space-y-2 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-1 bg-emerald-500 text-white rounded-bl">
+                                  <Check className="h-3 w-3 stroke-[3]" />
+                                </div>
+                                <h4 className="font-extrabold text-slate-850 dark:text-slate-100 line-clamp-1 pr-4">{listing.title}</h4>
+                                <p className="font-black text-emerald-600 dark:text-emerald-450">{formatCurrency(listing.price)}</p>
+                                <div className="flex justify-start gap-1 pt-1.5 border-t border-slate-100 dark:border-slate-850">
+                                  <button 
+                                    onClick={() => updatePropertyStage(listing.id, "escrow")}
+                                    className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-450 rounded text-[9px] font-bold cursor-pointer border-none"
+                                  >
+                                    Re-open Escrow
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                            {pipelineCounts.closed === 0 && (
+                              <p className="text-[10px] text-slate-400 dark:text-slate-650 text-center py-4 font-bold">No closed deals.</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Secondary row: Schedule & Tasks Checklist */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Upcoming Schedule Widget */}
+                      <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850 p-6 rounded-3xl shadow-sm space-y-4">
+                        <div className="flex justify-between items-center">
+                          <h3 className="font-extrabold text-sm text-slate-950 dark:text-white flex items-center gap-2">
+                            <Calendar className="h-4.5 w-4.5 text-blue-500" /> Agenda &amp; Showings
+                          </h3>
+                          <button
+                            onClick={() => {
+                              setApptClient(inquiries[0]?.name || "");
+                              setApptPropertyId(myListings[0]?.id || "");
+                              setIsAppointmentModalOpen(true);
+                            }}
+                            className="text-[10px] font-bold text-blue-500 bg-blue-500/10 px-2.5 py-1.5 rounded-lg hover:bg-blue-600/20 transition-colors border-none cursor-pointer"
+                          >
+                            + New Event
+                          </button>
+                        </div>
+
+                        <div className="space-y-3.5 pt-2">
+                          {appointments.map((appt) => (
+                            <div key={appt.id} className="p-3 bg-slate-50 dark:bg-slate-950/60 rounded-2xl border border-slate-100 dark:border-slate-850 flex justify-between items-start gap-4 text-xs">
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-2">
+                                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase bg-blue-600/10 text-blue-500">
+                                    {appt.type}
+                                  </span>
+                                  <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                                    <Clock className="h-3.5 w-3.5" /> {formatRelativeDate(appt.dateTime)}
+                                  </span>
+                                </div>
+                                <p className="font-bold text-slate-900 dark:text-white">
+                                  Client: {appt.clientName}
+                                </p>
+                                <p className="text-slate-450 dark:text-slate-400 text-[10px] line-clamp-1" title={appt.propertyTitle}>
+                                  Listing: {appt.propertyTitle}
+                                </p>
+                                {appt.notes && (
+                                  <p className="text-[10px] text-slate-500 dark:text-slate-450 italic">&ldquo;{appt.notes}&rdquo;</p>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleDeleteAppointment(appt.id)}
+                                className="p-1 text-slate-400 hover:text-red-500 cursor-pointer bg-transparent border-none"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                          {appointments.length === 0 && (
+                            <p className="text-xs text-slate-400 dark:text-slate-500 text-center py-12 font-bold">
+                              No scheduled showings or appointments.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Recent Tasks Widget */}
+                      <div className="bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-850 p-6 rounded-3xl shadow-sm space-y-4">
+                        <h3 className="font-extrabold text-sm text-slate-950 dark:text-white flex items-center gap-2">
+                          <CheckSquare className="h-4.5 w-4.5 text-blue-500" /> Action Items / Tasks
+                        </h3>
+
+                        {/* Quick Add Task */}
+                        <form onSubmit={handleAddTask} className="flex gap-2">
+                          <input
+                            type="text"
+                            value={taskText}
+                            onChange={(e) => setTaskText(e.target.value)}
+                            placeholder="Add action item (e.g. Schedule floor planner)..."
+                            required
+                            className="bg-slate-50 dark:bg-slate-950 px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-850 text-slate-850 dark:text-white placeholder-slate-400 outline-none w-full"
+                          />
+                          <button
+                            type="submit"
+                            className="px-4 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-750 transition-colors border-none cursor-pointer"
+                          >
+                            Add
+                          </button>
+                        </form>
+
+                        <div className="space-y-2.5 max-h-[220px] overflow-y-auto pr-1">
+                          {tasks.map((task) => (
+                            <div key={task.id} className="flex justify-between items-center p-2 hover:bg-slate-50 dark:hover:bg-slate-950 rounded-xl transition-colors text-xs">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleTask(task.id)}
+                                className="flex items-center gap-3 text-left font-semibold text-slate-850 dark:text-slate-200 cursor-pointer bg-transparent border-none outline-none"
+                              >
+                                {task.completed ? (
+                                  <CheckSquare className="h-4.5 w-4.5 text-emerald-500 flex-shrink-0" />
+                                ) : (
+                                  <Square className="h-4.5 w-4.5 text-slate-400 dark:text-slate-650 flex-shrink-0" />
+                                )}
+                                <span className={task.completed ? "line-through text-slate-400 dark:text-slate-600 font-light" : ""}>
+                                  {task.text}
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteTask(task.id)}
+                                className="p-1 text-slate-400 hover:text-red-500 cursor-pointer bg-transparent border-none"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          ))}
+                          {tasks.length === 0 && (
+                            <p className="text-xs text-slate-450 dark:text-slate-650 text-center py-8 font-bold">
+                              No outstanding checklist tasks.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === "marketing-kit" && (
+                <motion.div
+                  key="marketing-tab"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-8 text-left bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-850 rounded-3xl space-y-4 shadow-sm"
+                >
+                  <h3 className="font-extrabold text-sm text-slate-950 dark:text-white flex items-center gap-2">
+                    <Sparkles className="h-4.5 w-4.5 text-blue-500" /> Spire Marketing Kit
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Download high-resolution print flyers, customized brochure PDFs, and social media templates for your active listings.</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-slate-55 dark:bg-slate-950 rounded-2xl text-xs space-y-2 border border-slate-100 dark:border-slate-850">
+                      <h4 className="font-bold text-slate-800 dark:text-white">Print Flyers Template</h4>
+                      <p className="text-[10px] text-slate-400">Letter-sized high quality design assets.</p>
+                      <button className="px-3 py-1.5 bg-blue-600 hover:bg-blue-750 text-white rounded text-[10px] font-bold border-none cursor-pointer">Download SVG</button>
+                    </div>
+                    <div className="p-4 bg-slate-55 dark:bg-slate-950 rounded-2xl text-xs space-y-2 border border-slate-100 dark:border-slate-850">
+                      <h4 className="font-bold text-slate-800 dark:text-white">Social Media Kit</h4>
+                      <p className="text-[10px] text-slate-400">Square layout optimized for Instagram &amp; LinkedIn.</p>
+                      <button className="px-3 py-1.5 bg-blue-600 hover:bg-blue-750 text-white rounded text-[10px] font-bold border-none cursor-pointer">Download ZIP</button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === "settings" && (
+                <motion.div
+                  key="settings-tab"
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.2 }}
+                  className="p-8 text-left bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-850 rounded-3xl space-y-4 shadow-sm"
+                >
+                  <h3 className="font-extrabold text-sm text-slate-950 dark:text-white">Portal Settings</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Configure notifications, listing alerts, and lead assignment rules.</p>
+                  <div className="space-y-3 pt-2 text-xs">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" defaultChecked className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                      <span className="font-medium text-slate-700 dark:text-slate-350">Notify me via email when new client leads submit inquiries</span>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" defaultChecked className="rounded border-slate-300 text-blue-600 focus:ring-blue-500" />
+                      <span className="font-medium text-slate-700 dark:text-slate-350">Sync showings calendar automatically to my device calendar</span>
+                    </label>
+                  </div>
+                </motion.div>
+              )}
+\n{/* TAB 2: PROPERTY LISTINGS */}
+                  {activeTab === "my-listings" && (
                     <motion.div
                       key="listings-tab"
                       initial={{ opacity: 0, y: 15 }}
@@ -1291,7 +1896,7 @@ export default function Dashboard() {
                   )}
 
                   {/* TAB 3: CLIENT CRM LEADS & ACTIVITY NOTES */}
-                  {activeTab === "leads" && (
+                  {activeTab === "crm-leads" && (
                     <motion.div
                       key="leads-tab"
                       initial={{ opacity: 0, y: 15 }}
@@ -1606,7 +2211,7 @@ export default function Dashboard() {
                   )}
 
                   {/* TAB 5: COMMISSION LEDGER */}
-                  {activeTab === "commission" && (
+                  {activeTab === "analytics" && (
                     <motion.div
                       key="commission-tab"
                       initial={{ opacity: 0, y: 15 }}
@@ -1696,13 +2301,9 @@ export default function Dashboard() {
                   )}
 
                 </AnimatePresence>
-              </div>
-
-            </div>
-
+            </main>
           </div>
         )}
-      </main>
 
       {/* MODAL 1: CREATE PROPERTY LISTING */}
       {isAddModalOpen && (
