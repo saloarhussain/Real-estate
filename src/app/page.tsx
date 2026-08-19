@@ -15,7 +15,7 @@ export default function Home() {
   
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchCity, setSearchCity] = useState("all");
+  const [searchPincode, setSearchPincode] = useState("all");
   const [searchType, setSearchType] = useState("buy");
 
   // Valuation Estimator state
@@ -39,7 +39,7 @@ export default function Home() {
     e.preventDefault();
     let url = `/search?type=${searchType}`;
     if (searchQuery) url += `&query=${encodeURIComponent(searchQuery)}`;
-    if (searchCity !== "all") url += `&city=${encodeURIComponent(searchCity)}`;
+    if (searchPincode !== "all") url += `&pincode=${encodeURIComponent(searchPincode)}`;
     router.push(url);
   };
 
@@ -137,21 +137,23 @@ export default function Home() {
               </button>
             </div>
 
-            {/* City Selector */}
+            {/* Pincode Selector */}
             <div className="w-full md:w-44 border-r border-slate-200 dark:border-slate-800 pr-2">
               <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest text-left pl-3 mb-1">
-                Select City
+                Select Pincode
               </label>
               <select
-                value={searchCity}
-                onChange={(e) => setSearchCity(e.target.value)}
+                value={searchPincode}
+                onChange={(e) => setSearchPincode(e.target.value)}
                 className="w-full bg-transparent text-sm font-semibold text-slate-800 dark:text-slate-100 border-none outline-none focus:ring-0 cursor-pointer"
               >
-                <option value="all" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">All India</option>
-                <option value="Mumbai" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Mumbai</option>
-                <option value="Bangalore" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Bangalore</option>
-                <option value="Delhi" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Delhi NCR</option>
-                <option value="Goa" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">Goa</option>
+                <option value="all" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">All Pincodes</option>
+                <option value="400018" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">400018 (Mumbai)</option>
+                <option value="400050" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">400050 (Mumbai)</option>
+                <option value="560034" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">560034 (Bangalore)</option>
+                <option value="560038" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">560038 (Bangalore)</option>
+                <option value="110057" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">110057 (Delhi NCR)</option>
+                <option value="403509" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">403509 (Goa)</option>
               </select>
             </div>
 

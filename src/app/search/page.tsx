@@ -15,6 +15,8 @@ interface Property {
   price: number;
   address: string;
   city: string;
+  state?: string;
+  zipCode?: string;
   beds: number;
   baths: number;
   sqft: number;
@@ -31,11 +33,11 @@ function SearchContent() {
   const searchParams = useSearchParams();
 
   // Initial values from query string
-  const initialCity = searchParams.get("city") || "all";
+  const initialPincode = searchParams.get("pincode") || "all";
   const initialQuery = searchParams.get("query") || "";
 
   // Core filter states
-  const [city, setCity] = useState(initialCity);
+  const [pincode, setPincode] = useState(initialPincode);
   const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [maxPrice, setMaxPrice] = useState<number>(150000000); // 15 Cr max
   const [minBeds, setMinBeds] = useState<number>(0);
@@ -63,9 +65,9 @@ function SearchContent() {
   const filteredProperties = useMemo(() => {
     let activeListings = listings;
 
-    // 1. Filter by City
-    if (city !== "all") {
-      activeListings = activeListings.filter((p) => p.city.toLowerCase() === city.toLowerCase());
+    // 1. Filter by Pincode
+    if (pincode !== "all") {
+      activeListings = activeListings.filter((p) => p.zipCode === pincode);
     }
 
     // 2. Filter by search query text (match title, address, description)
@@ -93,11 +95,19 @@ function SearchContent() {
     }
 
     return activeListings;
-  }, [city, searchQuery, maxPrice, minBeds, propType, listings]);
+  }, [pincode, searchQuery, maxPrice, minBeds, propType, listings]);
 
   // Dynamically resolve the active city boundary to display based on filtered results or query keywords
   const activeCity = useMemo(() => {
-    if (city !== "all") return city;
+    if (pincode !== "all") {
+      if (filteredProperties.length > 0) {
+        return filteredProperties[0].city;
+      }
+      if (pincode === "400018" || pincode === "400050") return "Mumbai";
+      if (pincode === "560034" || pincode === "560038") return "Bangalore";
+      if (pincode === "110057") return "Delhi";
+      if (pincode === "403509") return "Goa";
+    }
     if (filteredProperties.length > 0) {
       const firstCity = filteredProperties[0].city;
       const allSame = filteredProperties.every((p) => p.city === firstCity);
@@ -109,7 +119,7 @@ function SearchContent() {
     if (queryLower.includes("delhi") || queryLower.includes("vasant")) return "Delhi";
     if (queryLower.includes("goa")) return "Goa";
     return "all";
-  }, [city, filteredProperties, searchQuery]);
+  }, [pincode, filteredProperties, searchQuery]);
 
   // Format currency helper
   const formatCurrency = (val: number) => {
@@ -144,17 +154,19 @@ function SearchContent() {
             )}
           </div>
 
-          {/* City Select */}
+          {/* Pincode Select */}
           <select
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
+            value={pincode}
+            onChange={(e) => setPincode(e.target.value)}
             className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-800 dark:text-white outline-none cursor-pointer"
           >
-            <option value="all">All India</option>
-            <option value="Mumbai">Mumbai</option>
-            <option value="Bangalore">Bangalore</option>
-            <option value="Delhi">Delhi NCR</option>
-            <option value="Goa">Goa</option>
+            <option value="all">All Pincodes</option>
+            <option value="400018">400018 (Mumbai)</option>
+            <option value="400050">400050 (Mumbai)</option>
+            <option value="560034">560034 (Bangalore)</option>
+            <option value="560038">560038 (Bangalore)</option>
+            <option value="110057">110057 (Delhi NCR)</option>
+            <option value="403509">403509 (Goa)</option>
           </select>
 
           {/* Property Type Select */}
@@ -251,7 +263,7 @@ function SearchContent() {
             {filteredProperties.length === 0 && (
               <button
                 onClick={() => {
-                  setCity("all");
+                  setPincode("all");
                   setSearchQuery("");
                   setMaxPrice(150000000);
                   setMinBeds(0);
