@@ -974,7 +974,7 @@ export default function Dashboard() {
           </header>
 
           {/* Sidebar */}
-          <aside className="fixed left-0 top-16 w-64 h-[calc(100vh-64px)] bg-surface-container-low border-r border-outline-variant/10 py-8">
+          <aside className="fixed left-0 top-16 w-64 h-[calc(100vh-64px)] bg-surface-container-low border-r border-outline-variant/10 py-8 z-20">
             <nav className="flex flex-col gap-1">
               <button
                 onClick={() => setActiveTab("dashboard")}
