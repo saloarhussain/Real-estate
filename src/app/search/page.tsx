@@ -33,7 +33,7 @@ function SearchContent() {
   const searchParams = useSearchParams();
 
   // Initial values from query string
-  const initialPincode = searchParams.get("pincode") || "all";
+  const initialPincode = searchParams.get("pincode") === "all" ? "" : (searchParams.get("pincode") || "");
   const initialQuery = searchParams.get("query") || "";
 
   // Core filter states
@@ -66,8 +66,9 @@ function SearchContent() {
     let activeListings = listings;
 
     // 1. Filter by Pincode
-    if (pincode !== "all") {
-      activeListings = activeListings.filter((p) => p.zipCode === pincode);
+    if (pincode.trim() !== "") {
+      const pin = pincode.trim();
+      activeListings = activeListings.filter((p) => p.zipCode && p.zipCode.includes(pin));
     }
 
     // 2. Filter by search query text (match title, address, description)
@@ -99,14 +100,15 @@ function SearchContent() {
 
   // Dynamically resolve the active city boundary to display based on filtered results or query keywords
   const activeCity = useMemo(() => {
-    if (pincode !== "all") {
+    if (pincode.trim() !== "") {
       if (filteredProperties.length > 0) {
         return filteredProperties[0].city;
       }
-      if (pincode === "400018" || pincode === "400050") return "Mumbai";
-      if (pincode === "560034" || pincode === "560038") return "Bangalore";
-      if (pincode === "110057") return "Delhi";
-      if (pincode === "403509") return "Goa";
+      const pin = pincode.trim();
+      if (pin.startsWith("400")) return "Mumbai";
+      if (pin.startsWith("560")) return "Bangalore";
+      if (pin.startsWith("110")) return "Delhi";
+      if (pin.startsWith("403")) return "Goa";
     }
     if (filteredProperties.length > 0) {
       const firstCity = filteredProperties[0].city;
@@ -154,20 +156,21 @@ function SearchContent() {
             )}
           </div>
 
-          {/* Pincode Select */}
-          <select
-            value={pincode}
-            onChange={(e) => setPincode(e.target.value)}
-            className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-850 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-800 dark:text-white outline-none cursor-pointer"
-          >
-            <option value="all">All Pincodes</option>
-            <option value="400018">400018 (Mumbai)</option>
-            <option value="400050">400050 (Mumbai)</option>
-            <option value="560034">560034 (Bangalore)</option>
-            <option value="560038">560038 (Bangalore)</option>
-            <option value="110057">110057 (Delhi NCR)</option>
-            <option value="403509">403509 (Goa)</option>
-          </select>
+          {/* Pincode Input */}
+          <div className="flex items-center gap-2 bg-white dark:bg-slate-950 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-850 w-full md:w-44">
+            <input
+              type="text"
+              value={pincode}
+              onChange={(e) => setPincode(e.target.value)}
+              placeholder="Enter Pincode"
+              className="bg-transparent border-none text-xs outline-none focus:ring-0 text-slate-800 dark:text-white placeholder-slate-400 w-full"
+            />
+            {pincode && (
+              <button onClick={() => setPincode("")} className="text-slate-400 hover:text-slate-600">
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
 
           {/* Property Type Select */}
           <select
@@ -263,7 +266,7 @@ function SearchContent() {
             {filteredProperties.length === 0 && (
               <button
                 onClick={() => {
-                  setPincode("all");
+                  setPincode("");
                   setSearchQuery("");
                   setMaxPrice(150000000);
                   setMinBeds(0);
