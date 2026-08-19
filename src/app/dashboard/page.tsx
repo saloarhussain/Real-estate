@@ -951,7 +951,7 @@ export default function Dashboard() {
           <header className="fixed top-0 w-full h-16 z-50 bg-deep-navy/90 backdrop-blur-md border-b border-outline-variant/10">
             <div className="h-16 px-gutter flex items-center justify-between">
               <div className="flex items-center gap-4 pl-6">
-                <span className="material-symbols-outlined text-accent-gold">dashboard_customize</span>
+                <span className="material-symbols-outlined text-data-white">grid_view</span>
                 <span className="font-headline-md text-data-white tracking-tight">Agent Central</span>
               </div>
               <div className="flex items-center gap-6 pr-6">
@@ -978,7 +978,7 @@ export default function Dashboard() {
             <nav className="flex flex-col gap-1">
               <button
                 onClick={() => setActiveTab("dashboard")}
-                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                className={`flex items-center px-6 py-3 font-label-caps text-sm tracking-wide text-left border-none cursor-pointer transition-all w-full bg-transparent ${
                   activeTab === "dashboard"
                     ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
                     : "text-on-surface-variant hover:bg-surface-container-high"
@@ -988,7 +988,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("crm-leads")}
-                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                className={`flex items-center px-6 py-3 font-label-caps text-sm tracking-wide text-left border-none cursor-pointer transition-all w-full bg-transparent ${
                   activeTab === "crm-leads"
                     ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
                     : "text-on-surface-variant hover:bg-surface-container-high"
@@ -998,7 +998,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("messages")}
-                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                className={`flex items-center px-6 py-3 font-label-caps text-sm tracking-wide text-left border-none cursor-pointer transition-all w-full bg-transparent ${
                   activeTab === "messages"
                     ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
                     : "text-on-surface-variant hover:bg-surface-container-high"
@@ -1008,7 +1008,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("my-listings")}
-                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                className={`flex items-center px-6 py-3 font-label-caps text-sm tracking-wide text-left border-none cursor-pointer transition-all w-full bg-transparent ${
                   activeTab === "my-listings"
                     ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
                     : "text-on-surface-variant hover:bg-surface-container-high"
@@ -1018,7 +1018,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("analytics")}
-                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                className={`flex items-center px-6 py-3 font-label-caps text-sm tracking-wide text-left border-none cursor-pointer transition-all w-full bg-transparent ${
                   activeTab === "analytics"
                     ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
                     : "text-on-surface-variant hover:bg-surface-container-high"
@@ -1026,23 +1026,13 @@ export default function Dashboard() {
               >
                 Analytics
               </button>
-              <button
-                onClick={() => setActiveTab("calendar")}
-                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
-                  activeTab === "calendar"
-                    ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
-                    : "text-on-surface-variant hover:bg-surface-container-high"
-                }`}
-              >
-                Calendar &amp; Tasks
-              </button>
 
               <div className="mt-8 px-6 mb-2">
                 <p className="font-label-caps text-[10px] text-outline uppercase tracking-[0.2em] text-left">Resources</p>
               </div>
               <button
                 onClick={() => setActiveTab("marketing-kit")}
-                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                className={`flex items-center px-6 py-3 font-label-caps text-sm tracking-wide text-left border-none cursor-pointer transition-all w-full bg-transparent ${
                   activeTab === "marketing-kit"
                     ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
                     : "text-on-surface-variant hover:bg-surface-container-high"
@@ -1052,7 +1042,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setActiveTab("settings")}
-                className={`flex items-center px-6 py-3 font-label-caps text-xs uppercase tracking-wider text-left border-none cursor-pointer transition-all w-full bg-transparent ${
+                className={`flex items-center px-6 py-3 font-label-caps text-sm tracking-wide text-left border-none cursor-pointer transition-all w-full bg-transparent ${
                   activeTab === "settings"
                     ? "bg-vibrant-blue/10 text-vibrant-blue border-r-2 border-vibrant-blue"
                     : "text-on-surface-variant hover:bg-surface-container-high"
