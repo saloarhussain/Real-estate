@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { BarChart, Bar, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { IndianRupee, Calendar, Percent, Clock, Wallet, LayoutGrid, ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { IndianRupee, Calendar, Percent, Clock, Wallet, LayoutGrid, ChevronDown, ChevronRight, Plus, Trash2, Building } from "lucide-react";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -143,6 +143,12 @@ export default function AmortizationCalculator() {
   const [startMonthIdx, setStartMonthIdx] = useState<number>(8); // September
   const [startYear, setStartYear] = useState<number>(2026);
 
+  const [usePropertyCostCalc, setUsePropertyCostCalc] = useState<boolean>(false);
+  const [propertyCost, setPropertyCost] = useState<number>(6000000);
+  const [downPaymentPercent, setDownPaymentPercent] = useState<number>(20);
+  const [stampDutyPercent, setStampDutyPercent] = useState<number>(5);
+  const [registrationPercent, setRegistrationPercent] = useState<number>(1);
+
   const [prepay, setPrepay] = useState<boolean>(true);
   const [prepayFrequency, setPrepayFrequency] = useState<string>("once"); // "once" | "twice"
   const [prepayAmount, setPrepayAmount] = useState<number>(400000);
@@ -155,6 +161,18 @@ export default function AmortizationCalculator() {
   const [lumpsums, setLumpsums] = useState<LumpsumItem[]>([
     { id: "1", amount: 2500000, monthIdx: startMonthIdx, year: startYear + 1 }
   ]);
+
+  const downPaymentAmount = (propertyCost * downPaymentPercent) / 100;
+  const stampDutyAmount = (propertyCost * stampDutyPercent) / 100;
+  const registrationAmount = (propertyCost * registrationPercent) / 100;
+  const totalCashRequired = downPaymentAmount + stampDutyAmount + registrationAmount;
+
+  const calculatedPrincipal = useMemo(() => {
+    if (usePropertyCostCalc) {
+      return Math.max(0, propertyCost - downPaymentAmount);
+    }
+    return principal;
+  }, [usePropertyCostCalc, propertyCost, downPaymentAmount, principal]);
 
   const addLumpsum = () => {
     const nextYear = lumpsums.length > 0 ? lumpsums[lumpsums.length - 1].year + 1 : startYear + 1;
@@ -180,8 +198,8 @@ export default function AmortizationCalculator() {
   const months = prepayFrequency === "once" ? [month1] : (month1 === month2 ? [month1] : [month1, month2]);
 
   const result = useMemo(
-    () => simulate({ principal, annualRate: rate, tenureYears: tenure, startMonthIdx, startYear, prepay, prepayAmount, prepayMonthsOfYear: months, mode, lumpsumEnabled, lumpsums }),
-    [principal, rate, tenure, startMonthIdx, startYear, prepay, prepayAmount, prepayFrequency, month1, month2, mode, lumpsumEnabled, lumpsums]
+    () => simulate({ principal: calculatedPrincipal, annualRate: rate, tenureYears: tenure, startMonthIdx, startYear, prepay, prepayAmount, prepayMonthsOfYear: months, mode, lumpsumEnabled, lumpsums }),
+    [calculatedPrincipal, rate, tenure, startMonthIdx, startYear, prepay, prepayAmount, prepayFrequency, month1, month2, mode, lumpsumEnabled, lumpsums]
   );
 
   const yearlyRows = useMemo(() => aggregateYearly(result.rows, startMonthIdx, startYear), [result.rows, startMonthIdx, startYear]);
@@ -251,12 +269,73 @@ export default function AmortizationCalculator() {
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6">
           {/* Inputs */}
           <div className="amz-panel px-4 py-5 sm:p-6 space-y-6 h-fit text-left">
-            <div>
-              <div className="amz-label mb-2 flex items-center gap-1.5"><IndianRupee size={13} /> Loan amount</div>
-              <input type="number" className={`${inputCls} amz-input amz-mono`} value={principal} min={100000} step={10000}
-                onChange={(e) => setPrincipal(Math.max(0, Number(e.target.value)))} />
-              <input type="range" className="w-full mt-2" min={100000} max={20000000} step={50000} value={principal} onChange={(e) => setPrincipal(Number(e.target.value))} />
+            <div className="flex items-center justify-between">
+              <div className="amz-label flex items-center gap-1.5" style={{ color: "var(--text)" }}><Building size={14} /> Calculate from Property Cost</div>
+              <button type="button" onClick={() => setUsePropertyCostCalc(!usePropertyCostCalc)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer border-none ${usePropertyCostCalc ? "amz-toggle-on" : "amz-toggle-off"}`}>
+                {usePropertyCostCalc ? "ON" : "OFF"}
+              </button>
             </div>
+
+            {usePropertyCostCalc ? (
+              <div className="space-y-4 p-3.5 rounded-xl border text-left" style={{ borderColor: "var(--line)", background: "rgba(255,255,255,0.015)" }}>
+                <div>
+                  <div className="amz-label mb-2 flex items-center gap-1.5"><IndianRupee size={11} /> Property Cost</div>
+                  <input type="number" className={`${inputCls} amz-input amz-mono`} value={propertyCost} min={100000} step={50000}
+                    onChange={(e) => setPropertyCost(Math.max(0, Number(e.target.value)))} />
+                  <input type="range" className="w-full mt-2" min={100000} max={50000000} step={100000} value={propertyCost} onChange={(e) => setPropertyCost(Number(e.target.value))} />
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <div className="amz-label mb-1.5">Down Pay %</div>
+                    <input type="number" className={`${inputCls} amz-input amz-mono`} value={downPaymentPercent} min={0} max={100} step={1}
+                      onChange={(e) => setDownPaymentPercent(Math.max(0, Math.min(100, Number(e.target.value))))} />
+                  </div>
+                  <div>
+                    <div className="amz-label mb-1.5">Stamp %</div>
+                    <input type="number" className={`${inputCls} amz-input amz-mono`} value={stampDutyPercent} min={0} max={20} step={0.1}
+                      onChange={(e) => setStampDutyPercent(Math.max(0, Math.min(20, Number(e.target.value))))} />
+                  </div>
+                  <div>
+                    <div className="amz-label mb-1.5">Reg. Fee %</div>
+                    <input type="number" className={`${inputCls} amz-input amz-mono`} value={registrationPercent} min={0} max={10} step={0.1}
+                      onChange={(e) => setRegistrationPercent(Math.max(0, Math.min(10, Number(e.target.value))))} />
+                  </div>
+                </div>
+
+                <div className="h-px" style={{ background: "var(--line)" }} />
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex justify-between">
+                    <span style={{ color: "var(--text-dim)" }}>Down Payment (Cash):</span>
+                    <span className="amz-mono font-medium">{fmtINR(downPaymentAmount)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: "var(--text-dim)" }}>Stamp Duty (Cash):</span>
+                    <span className="amz-mono font-medium">{fmtINR(stampDutyAmount)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: "var(--text-dim)" }}>Registration (Cash):</span>
+                    <span className="amz-mono font-medium">{fmtINR(registrationAmount)}</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-dashed" style={{ borderColor: "var(--line)" }}>
+                    <span className="font-semibold text-[13px]" style={{ color: "var(--gold)" }}>Total Cash Needed:</span>
+                    <span className="amz-mono font-bold text-[13px]" style={{ color: "var(--gold)" }}>{fmtINR(totalCashRequired)}</span>
+                  </div>
+                  <div className="flex justify-between pt-1">
+                    <span className="font-semibold text-[13px]" style={{ color: "var(--teal)" }}>Sanctioned Loan:</span>
+                    <span className="amz-mono font-bold text-[13px]" style={{ color: "var(--teal)" }}>{fmtINR(calculatedPrincipal)}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="amz-label mb-2 flex items-center gap-1.5"><IndianRupee size={13} /> Loan amount</div>
+                <input type="number" className={`${inputCls} amz-input amz-mono`} value={principal} min={100000} step={10000}
+                  onChange={(e) => setPrincipal(Math.max(0, Number(e.target.value)))} />
+                <input type="range" className="w-full mt-2" min={100000} max={20000000} step={50000} value={principal} onChange={(e) => setPrincipal(Number(e.target.value))} />
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -414,6 +493,23 @@ export default function AmortizationCalculator() {
                 <div className="amz-mono text-lg mt-1 font-medium" style={{ color: "var(--teal)" }}>{result.totalMonths} months</div>
               </div>
             </div>
+
+            {usePropertyCostCalc && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="amz-panel p-4">
+                  <div className="amz-label">Property Cost</div>
+                  <div className="amz-mono text-lg mt-1 font-medium">{fmtINR(propertyCost)}</div>
+                </div>
+                <div className="amz-panel p-4">
+                  <div className="amz-label">Sanctioned Loan</div>
+                  <div className="amz-mono text-lg mt-1 font-medium" style={{ color: "var(--teal)" }}>{fmtINR(calculatedPrincipal)}</div>
+                </div>
+                <div className="amz-panel p-4">
+                  <div className="amz-label">Total Cash (Out of Pocket)</div>
+                  <div className="amz-mono text-lg mt-1 font-medium" style={{ color: "var(--gold)" }}>{fmtINR(totalCashRequired)}</div>
+                </div>
+              </div>
+            )}
 
             {/* Chart */}
             <div className="amz-panel px-3 py-4 sm:p-5">
