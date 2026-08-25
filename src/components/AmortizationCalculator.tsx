@@ -225,6 +225,8 @@ export default function AmortizationCalculator() {
     return map;
   }, [monthlyRows, startMonthIdx, startYear]);
 
+  const showPrepayColumn = prepay || lumpsumEnabled;
+
   const [expandedYears, setExpandedYears] = useState<Set<string>>(new Set());
   const toggleYear = (label: string) => {
     setExpandedYears((prev) => {
@@ -481,16 +483,6 @@ export default function AmortizationCalculator() {
               </div>
             )}
 
-            <div className="h-px" style={{ background: "var(--line)" }} />
-
-            <div>
-              <div className="amz-label mb-2">Chart view</div>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => setGranularity("monthly")} className={`flex-1 px-3 py-2 rounded-lg text-sm cursor-pointer ${granularity === "monthly" ? "amz-seg-active" : "amz-seg"}`}>Monthly</button>
-                <button type="button" onClick={() => setGranularity("yearly")} className={`flex-1 px-3 py-2 rounded-lg text-sm cursor-pointer ${granularity === "yearly" ? "amz-seg-active" : "amz-seg"}`}>Yearly</button>
-              </div>
-              <p className="text-xs mt-2" style={{ color: "var(--text-dim)" }}>The table below is always yearly — click a row to expand its months.</p>
-            </div>
           </div>
 
           {/* Results */}
@@ -564,7 +556,7 @@ export default function AmortizationCalculator() {
                       <th className="amz-sticky pb-2 pr-3 font-normal">EMI</th>
                       <th className="amz-sticky pb-2 pr-3 font-normal" style={{ color: "var(--teal)" }}>Principal</th>
                       <th className="amz-sticky pb-2 pr-3 font-normal" style={{ color: "var(--coral)" }}>Interest</th>
-                      {prepay && <th className="amz-sticky pb-2 pr-3 font-normal" style={{ color: "var(--gold)" }}>Prepaid</th>}
+                      {showPrepayColumn && <th className="amz-sticky pb-2 pr-3 font-normal" style={{ color: "var(--gold)" }}>Prepaid</th>}
                       <th className="amz-sticky pb-2 font-normal">Balance</th>
                     </tr>
                   </thead>
@@ -587,7 +579,7 @@ export default function AmortizationCalculator() {
                             <td className="py-2 pr-3">{fmtINR(row.emi)}</td>
                             <td className="py-2 pr-3" style={{ color: "var(--teal)" }}>{fmtINR(row.principal)}</td>
                             <td className="py-2 pr-3" style={{ color: "var(--coral)" }}>{fmtINR(row.interest)}</td>
-                            {prepay && <td className="py-2 pr-3" style={{ color: row.prepay > 0 ? "var(--gold)" : "var(--text-dim)" }}>{row.prepay > 0 ? fmtINR(row.prepay) : "—"}</td>}
+                            {showPrepayColumn && <td className="py-2 pr-3" style={{ color: row.prepay > 0 ? "var(--gold)" : "var(--text-dim)" }}>{row.prepay > 0 ? fmtINR(row.prepay) : "—"}</td>}
                             <td className="py-2" style={{ color: "var(--text-dim)" }}>{fmtINR(row.balance)}</td>
                           </tr>
                           {isOpen && monthRows.map((mRow, j) => (
@@ -596,7 +588,7 @@ export default function AmortizationCalculator() {
                               <td className="py-1.5 pr-3" style={{ fontSize: "13px" }}>{fmtINR(mRow.emi)}</td>
                               <td className="py-1.5 pr-3" style={{ color: "var(--teal)", fontSize: "13px" }}>{fmtINR(mRow.principal)}</td>
                               <td className="py-1.5 pr-3" style={{ color: "var(--coral)", fontSize: "13px" }}>{fmtINR(mRow.interest)}</td>
-                              {prepay && <td className="py-1.5 pr-3" style={{ color: mRow.prepay > 0 ? "var(--gold)" : "var(--text-dim)", fontSize: "13px" }}>{mRow.prepay > 0 ? fmtINR(mRow.prepay) : "—"}</td>}
+                              {showPrepayColumn && <td className="py-1.5 pr-3" style={{ color: mRow.prepay > 0 ? "var(--gold)" : "var(--text-dim)", fontSize: "13px" }}>{mRow.prepay > 0 ? fmtINR(mRow.prepay) : "—"}</td>}
                               <td className="py-1.5" style={{ color: "var(--text-dim)", fontSize: "13px" }}>{fmtINR(mRow.balance)}</td>
                             </tr>
                           ))}
