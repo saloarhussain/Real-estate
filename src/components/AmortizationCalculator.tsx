@@ -25,6 +25,7 @@ interface LumpsumItem {
   amount: number;
   monthIdx: number;
   year: number;
+  reduceMode: "reduceTenure" | "reduceEmi";
 }
 
 interface SimulateParams {
@@ -84,11 +85,15 @@ function simulate({ principal, annualRate, tenureYears, startMonthIdx, startYear
     const emiPaid = interest + principalComponent;
 
     let prepayThisMonth = 0;
+    let shouldRecalculateEmi = false;
 
     if (prepay && balance > 0 && prepaySet.has(calMonthIdx) && month < totalMonths) {
       const applied = Math.min(prepayAmount, balance);
       prepayThisMonth += applied;
       balance -= applied;
+      if (mode === "reduceEmi") {
+        shouldRecalculateEmi = true;
+      }
     }
 
     if (lumpsumEnabled && lumpsums && lumpsums.length > 0) {
@@ -97,13 +102,16 @@ function simulate({ principal, annualRate, tenureYears, startMonthIdx, startYear
           const applied = Math.min(item.amount, balance);
           prepayThisMonth += applied;
           balance -= applied;
+          if (item.reduceMode === "reduceEmi") {
+            shouldRecalculateEmi = true;
+          }
         }
       });
     }
 
     if (prepayThisMonth > 0) {
       const remainingOriginalMonths = totalMonths - month;
-      if (mode === "reduceEmi" && balance > 0 && remainingOriginalMonths > 0) {
+      if (shouldRecalculateEmi && balance > 0 && remainingOriginalMonths > 0) {
         emi = r === 0
           ? balance / remainingOriginalMonths
           : (balance * r * Math.pow(1 + r, remainingOriginalMonths)) / (Math.pow(1 + r, remainingOriginalMonths) - 1);
@@ -159,7 +167,7 @@ export default function AmortizationCalculator() {
 
   const [lumpsumEnabled, setLumpsumEnabled] = useState<boolean>(false);
   const [lumpsums, setLumpsums] = useState<LumpsumItem[]>([
-    { id: "1", amount: 2500000, monthIdx: startMonthIdx, year: startYear + 1 }
+    { id: "1", amount: 2500000, monthIdx: startMonthIdx, year: startYear + 1, reduceMode: "reduceTenure" }
   ]);
 
   const downPaymentAmount = (propertyCost * downPaymentPercent) / 100;
@@ -182,7 +190,8 @@ export default function AmortizationCalculator() {
         id: Math.random().toString(36).substring(2, 9),
         amount: 500000,
         monthIdx: startMonthIdx,
-        year: Math.min(startYear + tenure, nextYear)
+        year: Math.min(startYear + tenure, nextYear),
+        reduceMode: "reduceTenure"
       }
     ]);
   };
@@ -448,6 +457,13 @@ export default function AmortizationCalculator() {
                           {MONTHS.map((m, i) => <option key={m} value={i}>{m}</option>)}
                         </select>
                         <input type="number" className={`${inputCls} amz-input amz-mono`} value={item.year} onChange={(e) => updateLumpsum(item.id, "year", Number(e.target.value))} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="amz-label mb-1.5">Reduce</div>
+                      <div className="flex gap-2">
+                        <button type="button" onClick={() => updateLumpsum(item.id, "reduceMode", "reduceTenure")} className={`flex-1 px-3 py-1.5 rounded-lg text-xs cursor-pointer ${item.reduceMode === "reduceTenure" ? "amz-seg-active" : "amz-seg"}`}>Tenure</button>
+                        <button type="button" onClick={() => updateLumpsum(item.id, "reduceMode", "reduceEmi")} className={`flex-1 px-3 py-1.5 rounded-lg text-xs cursor-pointer ${item.reduceMode === "reduceEmi" ? "amz-seg-active" : "amz-seg"}`}>EMI</button>
                       </div>
                     </div>
                   </div>
