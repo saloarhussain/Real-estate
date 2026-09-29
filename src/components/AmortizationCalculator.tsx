@@ -156,6 +156,8 @@ export default function AmortizationCalculator() {
   const [downPaymentPercent, setDownPaymentPercent] = useState<number>(20);
   const [stampDutyPercent, setStampDutyPercent] = useState<number>(5);
   const [registrationPercent, setRegistrationPercent] = useState<number>(1);
+  const [isNewDevelopment, setIsNewDevelopment] = useState<boolean>(false);
+  const [gstPercent, setGstPercent] = useState<number>(5);
 
   const [prepay, setPrepay] = useState<boolean>(true);
   const [prepayFrequency, setPrepayFrequency] = useState<string>("once"); // "once" | "twice"
@@ -173,7 +175,8 @@ export default function AmortizationCalculator() {
   const downPaymentAmount = (propertyCost * downPaymentPercent) / 100;
   const stampDutyAmount = (propertyCost * stampDutyPercent) / 100;
   const registrationAmount = (propertyCost * registrationPercent) / 100;
-  const totalCashRequired = downPaymentAmount + stampDutyAmount + registrationAmount;
+  const gstAmount = isNewDevelopment ? (propertyCost * gstPercent) / 100 : 0;
+  const totalCashRequired = downPaymentAmount + stampDutyAmount + registrationAmount + gstAmount;
 
   const calculatedPrincipal = useMemo(() => {
     if (usePropertyCostCalc) {
@@ -296,6 +299,13 @@ export default function AmortizationCalculator() {
                   <input type="range" className="w-full mt-2" min={100000} max={50000000} step={100000} value={propertyCost} onChange={(e) => setPropertyCost(Number(e.target.value))} />
                 </div>
 
+                <div className="flex items-center justify-between mt-4">
+                  <div className="amz-label flex items-center gap-1.5">New Development? (Add GST)</div>
+                  <button type="button" onClick={() => setIsNewDevelopment(!isNewDevelopment)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer border-none ${isNewDevelopment ? "amz-toggle-on" : "amz-toggle-off"}`}>
+                    {isNewDevelopment ? "YES" : "NO"}
+                  </button>
+                </div>
+
                 <div className="grid grid-cols-3 gap-2">
                   <div>
                     <div className="amz-label mb-1.5">Down Pay %</div>
@@ -312,6 +322,13 @@ export default function AmortizationCalculator() {
                     <input type="number" className={`${inputCls} amz-input amz-mono`} value={registrationPercent} min={0} max={10} step={0.1}
                       onChange={(e) => setRegistrationPercent(Math.max(0, Math.min(10, Number(e.target.value))))} />
                   </div>
+                  {isNewDevelopment && (
+                    <div>
+                      <div className="amz-label mb-1.5">GST %</div>
+                      <input type="number" className={`${inputCls} amz-input amz-mono`} value={gstPercent} min={0} max={30} step={0.1}
+                        onChange={(e) => setGstPercent(Math.max(0, Math.min(30, Number(e.target.value))))} />
+                    </div>
+                  )}
                 </div>
 
                 <div className="h-px" style={{ background: "var(--line)" }} />
@@ -329,6 +346,12 @@ export default function AmortizationCalculator() {
                     <span style={{ color: "var(--text-dim)" }}>Registration (Cash):</span>
                     <span className="amz-mono font-medium">{fmtINR(registrationAmount)}</span>
                   </div>
+                  {isNewDevelopment && (
+                    <div className="flex justify-between">
+                      <span style={{ color: "var(--text-dim)" }}>GST (Cash):</span>
+                      <span className="amz-mono font-medium">{fmtINR(gstAmount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between pt-2 border-t border-dashed" style={{ borderColor: "var(--line)" }}>
                     <span className="font-semibold text-[13px]" style={{ color: "var(--gold)" }}>Total Cash Needed:</span>
                     <span className="amz-mono font-bold text-[13px]" style={{ color: "var(--gold)" }}>{fmtINR(totalCashRequired)}</span>
