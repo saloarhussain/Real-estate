@@ -299,14 +299,14 @@ export default function AmortizationCalculator() {
                   <input type="range" className="w-full mt-2" min={100000} max={50000000} step={100000} value={propertyCost} onChange={(e) => setPropertyCost(Number(e.target.value))} />
                 </div>
 
-                <div className="flex items-center justify-between mt-4">
-                  <div className="amz-label flex items-center gap-1.5">New Development? (Add GST)</div>
-                  <button type="button" onClick={() => setIsNewDevelopment(!isNewDevelopment)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer border-none ${isNewDevelopment ? "amz-toggle-on" : "amz-toggle-off"}`}>
+                <div className="flex items-center justify-between mt-4 mb-2">
+                  <div className="amz-label flex items-center gap-1.5" style={{ fontSize: "11px", whiteSpace: "normal" }}>New Development? (Add GST)</div>
+                  <button type="button" onClick={() => setIsNewDevelopment(!isNewDevelopment)} className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer border-none flex-shrink-0 ml-2 ${isNewDevelopment ? "amz-toggle-on" : "amz-toggle-off"}`}>
                     {isNewDevelopment ? "YES" : "NO"}
                   </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                   <div>
                     <div className="amz-label mb-1.5">Down Pay %</div>
                     <input type="number" className={`${inputCls} amz-input amz-mono`} value={downPaymentPercent} min={0} max={100} step={1}
