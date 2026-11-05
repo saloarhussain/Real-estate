@@ -360,6 +360,10 @@ export default function AmortizationCalculator() {
                     <span className="font-semibold text-[13px]" style={{ color: "var(--teal)" }}>Sanctioned Loan:</span>
                     <span className="amz-mono font-bold text-[13px]" style={{ color: "var(--teal)" }}>{fmtINR(calculatedPrincipal)}</span>
                   </div>
+                  <div className="flex justify-between pt-2 mt-1 border-t" style={{ borderColor: "var(--line)" }}>
+                    <span className="font-bold text-[13px]" style={{ color: "var(--text)" }}>Total Amount:</span>
+                    <span className="amz-mono font-bold text-[13px]" style={{ color: "var(--text)" }}>{fmtINR(totalCashRequired + calculatedPrincipal)}</span>
+                  </div>
                 </div>
               </div>
             ) : (
